@@ -34,9 +34,10 @@ public func counterReducer(state: inout CounterState, action: CounterAction) -> 
             nthPrime(state.count)
 //                .map { CounterAction.nthPrimeResponse($0)}
                 // так короче:
-                .map (CounterAction.nthPrimeResponse)
-                .receive(on: .main)
-            
+                .map(CounterAction.nthPrimeResponse)
+                .receive(on: DispatchQueue.main)
+                .eraseToEffect()
+
 //            Effect { callback in
 //                // лучше сделать без semaphore
 //                nthPrime(count) { prime in

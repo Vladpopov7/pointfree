@@ -34,7 +34,7 @@ public struct Effect<Output>: Publisher {
     }
 }
 
-extension Effect where Failure == Never {
+extension Publisher where Failure == Never {
     public func eraseToEffect() -> Effect<Output> {
         return Effect(publisher: self.eraseToAnyPublisher())
     }
@@ -60,7 +60,7 @@ public final class Store<Value, Action>: ObservableObject {
         effects.forEach { effect in
             // Inside this receiveCompletion we could try to remove the cancellable from the array, but we don’t actually have access to it here. We have a bit of a chicken-and-egg problem, where the cancellable is created by calling sink but we need access to the cancellable from inside one of the closures that defines the sink.
             // To work around this we need to extract out the cancellable into an implicitly unwrapped optional, which allows us to get a variable for a type before it holds a value, and then later we get to assign the variable.
-            var effectCancellable = AnyCancellable?
+            var effectCancellable: AnyCancellable?
             var didComplete = false
             effectCancellable = effect.sink(
                 receiveCompletion: { [weak self] _ in
@@ -75,7 +75,6 @@ public final class Store<Value, Action>: ObservableObject {
             if !didComplete, let effectCancellable {
                 self.effectCancellables.insert(effectCancellable)
             }
-            
         }
     }
     
@@ -132,7 +131,7 @@ public func pullback<LocalValue, GlobalValue, LocalAction, GlobalAction>(
         return localEffects.map { localEffect in
             localEffect.map { localAction -> GlobalAction in
                 var globalAction = globalAction
-                // keyPath is writable
+                // key path is writable
                 globalAction[keyPath: action] = localAction
                 return globalAction
             }
