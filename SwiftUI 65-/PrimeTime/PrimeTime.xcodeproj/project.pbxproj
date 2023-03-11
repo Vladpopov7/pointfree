@@ -721,28 +721,24 @@
 					};
 					12653EEF29AD072600CD77F8 = {
 						CreatedOnToolsVersion = 14.2;
-						TestTargetID = 12653EB229AD03A900CD77F8;
 					};
 					12653F0929AD075200CD77F8 = {
 						CreatedOnToolsVersion = 14.2;
 					};
 					12653F1229AD075200CD77F8 = {
 						CreatedOnToolsVersion = 14.2;
-						TestTargetID = 12653EB229AD03A900CD77F8;
 					};
 					12653F2B29AD079900CD77F8 = {
 						CreatedOnToolsVersion = 14.2;
 					};
 					12653F3429AD079A00CD77F8 = {
 						CreatedOnToolsVersion = 14.2;
-						TestTargetID = 12653EB229AD03A900CD77F8;
 					};
 					12653F4D29AD07E800CD77F8 = {
 						CreatedOnToolsVersion = 14.2;
 					};
 					12653F5629AD07E800CD77F8 = {
 						CreatedOnToolsVersion = 14.2;
-						TestTargetID = 12653EB229AD03A900CD77F8;
 					};
 				};
 			};
@@ -1359,7 +1355,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Debug;
 		};
@@ -1377,7 +1372,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Release;
 		};
@@ -1455,7 +1449,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Debug;
 		};
@@ -1473,7 +1466,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Release;
 		};
@@ -1551,7 +1543,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Debug;
 		};
@@ -1569,7 +1560,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Release;
 		};
@@ -1647,7 +1637,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Debug;
 		};
@@ -1665,7 +1654,6 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PrimeTime.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PrimeTime";
 			};
 			name = Release;
 		};

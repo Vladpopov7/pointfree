@@ -1,36 +1,165 @@
-//
-//  CounterTests.swift
-//  CounterTests
-//
-//  Created by Vladislav Popov on 27/02/2023.
-//
-
 import XCTest
 @testable import Counter
 
-final class CounterTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+class CounterTests: XCTestCase {
+    func testIncrButtonTapped() {
+        var state = CounterViewState (
+            alertNthPrime: nil,
+            count: 2,
+            favoritePrimes: [3, 5],
+            isNthPrimeButtonDisabled: false
+        )
+        let effects = counterViewReducer(&state, .counter(.incrTapped))
+        
+        XCTAssertEqual(
+            state,
+            CounterViewState(
+                alertNthPrime: nil,
+                count: 3,
+                favoritePrimes: [3, 5],
+                isNthPrimeButtonDisabled: false
+            )
+        )
+        XCTAssertTrue(effects.isEmpty)
+    }
+    
+    func testDecrButtonTapped() {
+        var state = CounterViewState (
+            alertNthPrime: nil,
+            count: 2,
+            favoritePrimes: [3, 5],
+            isNthPrimeButtonDisabled: false
+        )
+        let effects = counterViewReducer(&state, .counter(.decrTapped))
+        
+        XCTAssertEqual(
+            state,
+            CounterViewState(
+                alertNthPrime: nil,
+                count: 1,
+                favoritePrimes: [3, 5],
+                isNthPrimeButtonDisabled: false
+            )
+        )
+        XCTAssertTrue(effects.isEmpty)
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    func testNthPrimeButtonHappyFlow() {
+        var state = CounterViewState (
+            alertNthPrime: nil,
+            count: 2,
+            favoritePrimes: [3, 5],
+            isNthPrimeButtonDisabled: false
+        )
+        
+        var effects = counterViewReducer(&state, .counter(.nthPrimeButtonTapped))
+        
+        XCTAssertEqual(
+            state,
+            CounterViewState(
+                alertNthPrime: nil,
+                count: 2,
+                favoritePrimes: [3, 5],
+                isNthPrimeButtonDisabled: true
+            )
+        )
+        XCTAssertEqual(effects.count, 1)
+        
+        effects = counterViewReducer(&state, .counter(.nthPrimeResponse(3)))
+        
+        XCTAssertEqual(
+            state,
+            CounterViewState(
+                alertNthPrime: PrimeAlert(prime: 3),
+                count: 2,
+                favoritePrimes: [3, 5],
+                isNthPrimeButtonDisabled: false
+            )
+        )
+        XCTAssertTrue(effects.isEmpty)
+        
+        effects = counterViewReducer(&state, .counter(.alertDismissButtonTapped))
+        
+        XCTAssertEqual(
+            state,
+            CounterViewState(
+                alertNthPrime: nil,
+                count: 2,
+                favoritePrimes: [3, 5],
+                isNthPrimeButtonDisabled: false
+            )
+        )
+        XCTAssertTrue(effects.isEmpty)
+    }
+    
+    func testNthPrimeButtonUnhappyFlow() {
+        var state = CounterViewState (
+            alertNthPrime: nil,
+            count: 2,
+            favoritePrimes: [3, 5],
+            isNthPrimeButtonDisabled: false
+        )
+        
+        var effects = counterViewReducer(&state, .counter(.nthPrimeButtonTapped))
+        
+        XCTAssertEqual(
+            state,
+            CounterViewState(
+                alertNthPrime: nil,
+                count: 2,
+                favoritePrimes: [3, 5],
+                isNthPrimeButtonDisabled: true
+            )
+        )
+        XCTAssertEqual(effects.count, 1)
+        
+        effects = counterViewReducer(&state, .counter(.nthPrimeResponse(nil)))
+        
+        XCTAssertEqual(
+            state,
+            CounterViewState(
+                alertNthPrime: nil,
+                count: 2,
+                favoritePrimes: [3, 5],
+                isNthPrimeButtonDisabled: false
+            )
+        )
+        XCTAssertTrue(effects.isEmpty)
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
+    func testPrimeModa1 () {
+        var state = CounterViewState(
+            alertNthPrime: nil,
+            count: 2,
+            favoritePrimes: [3, 5],
+            isNthPrimeButtonDisabled: false
+        )
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
+        var effects = counterViewReducer(&state, .primeModal(.saveFavoritePrimeTapped))
+        
+        XCTAssertEqual(
+            state,
+            CounterViewState(
+                alertNthPrime: nil,
+                count: 2,
+                favoritePrimes: [3, 5, 2],
+                isNthPrimeButtonDisabled: false
+            )
+        )
+        XCTAssertTrue(effects.isEmpty)
+        
+        effects = counterViewReducer(&state, .primeModal(.removeFavoritePrimeTapped))
+        
+        XCTAssertEqual(
+            state,
+            CounterViewState(
+                alertNthPrime: nil,
+                count: 2,
+                favoritePrimes: [3, 5],
+                isNthPrimeButtonDisabled: false
+            )
+        )
 
+        XCTAssertTrue(effects.isEmpty)
+    }
 }
