@@ -2,7 +2,7 @@ import ComposableArchitecture
 import PrimeModal
 import SwiftUI
 
-public enum CounterAction {
+public enum CounterAction: Equatable {
     case decrTapped
     case incrTapped
     case nthPrimeButtonTapped
@@ -31,7 +31,8 @@ public func counterReducer(state: inout CounterState, action: CounterAction) -> 
         // создавать копию больше не нужно, потому что nthPrime сразу берет копию как параметр
 //        let count = state.count
         return [
-            nthPrime(state.count)
+//            nthPrime(state.count)
+            Current.nthPrime(state.count)
 //                .map { CounterAction.nthPrimeResponse($0)}
                 // так короче:
                 .map(CounterAction.nthPrimeResponse)
@@ -68,6 +69,20 @@ public func counterReducer(state: inout CounterState, action: CounterAction) -> 
         state.alertNthPrime = nil
         return []
     }
+}
+
+struct CounterEnvironment {
+    var nthPrime: (Int) -> Effect<Int?>
+}
+
+extension CounterEnvironment {
+    static let live = CounterEnvironment(nthPrime: Counter.nthPrime)
+}
+
+var Current = CounterEnvironment.live
+
+extension CounterEnvironment {
+    static let mock = CounterEnvironment(nthPrime: { _ in .sync { 17 }})
 }
 
 // комбинация двух pullback для экрана который может показывать modal экран
@@ -110,7 +125,7 @@ public struct CounterViewState: Equatable {
     }
 }
 // CounterView управляет не только своим state, но и может открыть еще primeModal, поэтому создается новый enum и case называются как в AppAction, но только те которые нужны
-public enum CounterViewAction {
+public enum CounterViewAction: Equatable {
     case counter(CounterAction)
     case primeModal(PrimeModalAction)
     

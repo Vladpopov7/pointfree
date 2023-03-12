@@ -1,7 +1,12 @@
 import ComposableArchitecture
-import Counter
+@testable import Counter
 import PlaygroundSupport
 import SwiftUI
+
+Current = .mock
+Current.nthPrime = { _ in
+        .sync { 7236893748932 }
+}
 
 // мы можем использовать отдельные экраны, как-будто у нас нет общего состояния, т.е. можно начать мигрировать с UIKit на SwiftUI с мелких экранов\
 // разбор экрана которые имеет modal экран и может управлять состоянием показа этого экрана (primeModal(PrimeModalAction) в CounterViewAction)

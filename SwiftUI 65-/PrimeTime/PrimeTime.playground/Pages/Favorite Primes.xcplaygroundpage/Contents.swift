@@ -1,9 +1,14 @@
 import ComposableArchitecture
-import FavoritePrimes
+@testable import FavoritePrimes
 import PlaygroundSupport
 import SwiftUI
 
-print("f")
+Current = .mock
+Current.fileClient.load = { _ in
+    Effect.sync { try!
+        JSONEncoder().encode(Array(1...100))
+    }
+}
 
 PlaygroundPage.current.liveView = UIHostingController(
     rootView: NavigationView {
