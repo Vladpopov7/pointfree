@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		122122C029BF8E10005B492D /* ComposableArchitectureTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122122BF29BF8E10005B492D /* ComposableArchitectureTestSupport.swift */; };
 		122964F529AFBB47009D90A7 /* WolframAlpha.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122964F429AFBB47009D90A7 /* WolframAlpha.swift */; };
 		12653EB729AD03A900CD77F8 /* PrimeTimeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12653EB629AD03A900CD77F8 /* PrimeTimeApp.swift */; };
 		12653EB929AD03A900CD77F8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12653EB829AD03A900CD77F8 /* ContentView.swift */; };
@@ -173,6 +174,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		122122BF29BF8E10005B492D /* ComposableArchitectureTestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposableArchitectureTestSupport.swift; sourceTree = "<group>"; };
 		122964F429AFBB47009D90A7 /* WolframAlpha.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WolframAlpha.swift; sourceTree = "<group>"; };
 		122964F629AFCFC6009D90A7 /* PrimeTime.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = PrimeTime.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		12653EB329AD03A900CD77F8 /* PrimeTime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrimeTime.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -391,6 +393,7 @@
 			isa = PBXGroup;
 			children = (
 				12653EF729AD072600CD77F8 /* CounterTests.swift */,
+				122122BF29BF8E10005B492D /* ComposableArchitectureTestSupport.swift */,
 			);
 			path = CounterTests;
 			sourceTree = "<group>";
@@ -895,6 +898,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				12653EF829AD072600CD77F8 /* CounterTests.swift in Sources */,
+				122122C029BF8E10005B492D /* ComposableArchitectureTestSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
