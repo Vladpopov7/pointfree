@@ -8,12 +8,15 @@ public enum CounterAction: Equatable {
     case nthPrimeButtonTapped
     case nthPrimeResponse(Int?)
     case alertDismissButtonTapped
+    case isPrimeButtonTapped
+    case primeModalDismissed
 }
 
 public typealias CounterState = (
     alertNthPrime: PrimeAlert?,
     count: Int,
-    isNthPrimeButtonDisabled: Bool
+    isNthPrimeButtonDisabled: Bool,
+    isPrimeModalShown: Bool
 )
 
 public func counterReducer(state: inout CounterState, action: CounterAction) -> [Effect<CounterAction>] {
@@ -68,6 +71,14 @@ public func counterReducer(state: inout CounterState, action: CounterAction) -> 
     case .alertDismissButtonTapped:
         state.alertNthPrime = nil
         return []
+        
+    case .isPrimeButtonTapped:
+        state.isPrimeModalShown = true
+        return []
+        
+    case .primeModalDismissed:
+        state.isPrimeModalShown = false
+        return []
     }
 }
 
@@ -101,22 +112,25 @@ public struct CounterViewState: Equatable {
     public var count: Int
     public var favoritePrimes: [Int]
     public var isNthPrimeButtonDisabled: Bool
+    public var isPrimeModalShown: Bool
     
     public init(
         alertNthPrime: PrimeAlert? = nil,
         count: Int = 0,
         favoritePrimes: [Int] = [],
-        isNthPrimeButtonDisabled: Bool = false
+        isNthPrimeButtonDisabled: Bool = false,
+        isPrimeModalShown: Bool = false
     ) {
         self.alertNthPrime = alertNthPrime
         self.count = count
         self.favoritePrimes = favoritePrimes
         self.isNthPrimeButtonDisabled = isNthPrimeButtonDisabled
+        self.isPrimeModalShown = isPrimeModalShown
     }
     
     var counter: CounterState {
-        get { (self.alertNthPrime, self.count, self.isNthPrimeButtonDisabled) }
-        set { (self.alertNthPrime, self.count, self.isNthPrimeButtonDisabled) = newValue }
+        get { (self.alertNthPrime, self.count, self.isNthPrimeButtonDisabled, self.isPrimeModalShown) }
+        set { (self.alertNthPrime, self.count, self.isNthPrimeButtonDisabled, self.isPrimeModalShown) = newValue }
     }
     
     var primeModal: PrimeModalState {
@@ -159,7 +173,7 @@ public struct CounterView: View {
 
     // чтобы сохранялось состояние надо использовать @ObjectBinding(deprecated, теперь @ObservedObject) нашего собственноого типа AppState, который конформит protocol BindableObject(deprecated)
     @ObservedObject var store: Store<CounterViewState, CounterViewAction>
-    @State var isPrimeModalShown: Bool = false
+//    @State var isPrimeModalShown: Bool = false
 //    @State var alertNthPrime: PrimeAlert?
 //    @State var isNthPrimeButtonDisabled = false
     
@@ -174,7 +188,7 @@ public struct CounterView: View {
                 Text("\(self.store.value.count)")
                 Button("+") { self.store.send(.counter(.incrTapped)) }
             }
-            Button("Is this prime?") { self.isPrimeModalShown = true }
+            Button("Is this prime?") { self.store.send(.counter(.isPrimeButtonTapped)) }
             Button("What is the \(ordinal(self.store.value.count)) prime?", action: self.nthPrimeButtonAction)
                 .disabled(self.store.value.isNthPrimeButtonDisabled)
         }
@@ -190,7 +204,12 @@ public struct CounterView: View {
 //            )
 //            : nil
 //        )
-        .sheet(isPresented: self.$isPrimeModalShown) {
+        // так как храним уже не в @State, поэтому используем .constant
+//        .sheet(isPresented: self.$isPrimeModalShown) {
+        .sheet(
+            isPresented: .constant(self.store.value.isPrimeModalShown),
+            onDismiss: { self.store.send(.counter(.primeModalDismissed)) }
+        ) {
             IsPrimeModalView(
                 store: self.store
                     .view(

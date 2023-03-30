@@ -1,41 +1,33 @@
-//
-//  PrimeTimeUITests.swift
-//  PrimeTimeUITests
-//
-//  Created by Vladislav Popov on 27/02/2023.
-//
-
 import XCTest
+@testable import Counter
 
 final class PrimeTimeUITests: XCTestCase {
-
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+        Current = .mock
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
+    
     func testExample() throws {
-        // UI tests must launch the application that they test.
         let app = XCUIApplication()
+        app.launchEnvironment["UI_TESTS"] = "1"
+        app.launchEnvironment["UNHAPPY_PATHS"] = "1"
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
-        }
+        
+        app.tables/*@START_MENU_TOKEN@*/.buttons["Counter demo"]/*[[".cells.buttons[\"Counter demo\"]",".buttons[\"Counter demo\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        
+        let button = app.buttons["+"]
+        button.tap()
+        XCTAssert(app.staticTexts["1"].exists)
+        button.tap()
+        XCTAssert(app.staticTexts["2"].exists)
+        app.buttons["What is the 2nd prime?"].tap()
+        let alert = app.alerts["The 2nd prime is 3"]
+        XCTAssert(alert.waitForExistence(timeout: 5))
+        // тут фейлилось потому что для показа alert нужно время, поэтому создали let alert и wait for 5 seconds
+        alert.scrollViews.otherElements.buttons["Ok"].tap()
+        app.buttons["Is this prime?"].tap()
+        app.buttons["Save to favorite primes"].tap()
+        app.children(matching: .window).element(boundBy: 0).children(matching: .other).element.children(matching: .other).element(boundBy: 0).swipeDown()
+                        
     }
 }

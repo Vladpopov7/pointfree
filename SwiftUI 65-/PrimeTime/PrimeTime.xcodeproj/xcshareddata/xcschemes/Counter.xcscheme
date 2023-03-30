@@ -20,6 +20,34 @@
                ReferencedContainer = "container:PrimeTime.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "12653ECC29AD03AE00CD77F8"
+               BuildableName = "PrimeTimeUITests.xctest"
+               BlueprintName = "PrimeTimeUITests"
+               ReferencedContainer = "container:PrimeTime.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "12653EB229AD03A900CD77F8"
+               BuildableName = "PrimeTime.app"
+               BlueprintName = "PrimeTime"
+               ReferencedContainer = "container:PrimeTime.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

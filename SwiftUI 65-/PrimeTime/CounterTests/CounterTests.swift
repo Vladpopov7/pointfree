@@ -1,11 +1,79 @@
 import XCTest
 @testable import Counter
-import Combine
+import SnapshotTesting
+import ComposableArchitecture
+import SwiftUI
+
+
+extension Snapshotting where Value: UIViewController, Format == UIImage {
+  static var windowedImage: Snapshotting {
+    return Snapshotting<UIImage, UIImage>.image.asyncPullback { vc in
+      Async<UIImage> { callback in
+        UIView.setAnimationsEnabled(false)
+        let window = UIApplication.shared.windows.first!
+        window.rootViewController = vc
+        DispatchQueue.main.async {
+          let image = UIGraphicsImageRenderer(bounds: window.bounds).image { ctx in
+            window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+          }
+          callback(image)
+          UIView.setAnimationsEnabled(true)
+        }
+      }
+    }
+  }
+}
 
 class CounterTests: XCTestCase {
     override class func setUp() {
         super.setUp()
         Current = .mock
+    }
+    
+    func testSnapshots() {
+        let store = Store(initialValue: CounterViewState(), reducer: counterViewReducer)
+        let view = CounterView(store: store)
+        
+        let vc = UIHostingController(rootView: view)
+        vc.view.frame = UIScreen.main.bounds
+
+        // при первом запуске зафейлится, нужно будет взять строку начинающуюся на open... из выскочившей ошибки и вставить в terminal
+        // record включает режим записи, по строке из ошибки можно получить доступ к сгенерированному image
+//        isRecording=true
+        assertSnapshot(matching: vc, as: .windowedImage)
+        
+        store.send(.counter(.incrTapped))
+        assertSnapshot(matching: vc, as: .windowedImage)
+        
+        store.send(.counter(.incrTapped))
+        assertSnapshot(matching: vc, as: .windowedImage)
+        
+        store.send(.counter(.nthPrimeButtonTapped))
+        assertSnapshot(matching: vc, as: .windowedImage)
+        
+        var expectation = self.expectation(description: "wait")
+        DispatchQueue.main.asyncAfter (deadline: .now() + 0.5) {
+            expectation.fulfill()
+        }
+        self.wait(for: [expectation], timeout: 0.5)
+        assertSnapshot(matching: vc, as: .windowedImage)
+        
+        store.send(.counter(.alertDismissButtonTapped))
+        expectation = self.expectation(description: "wait")
+        DispatchQueue.main.asyncAfter (deadline: .now() + 0.5) {
+            expectation.fulfill()
+        }
+        self.wait(for: [expectation], timeout: 0.5)
+        assertSnapshot(matching: vc, as: .windowedImage)
+
+        store.send(.counter(.isPrimeButtonTapped))
+        assertSnapshot(matching: vc, as: .windowedImage)
+        
+        store.send(.primeModal(.saveFavoritePrimeTapped))
+        assertSnapshot(matching: vc, as: .windowedImage)
+        
+        store.send(.counter(.primeModalDismissed))
+        assertSnapshot(matching: vc, as: .windowedImage)
     }
     
     func testIncrDecrButtonTapped() {
@@ -19,7 +87,7 @@ class CounterTests: XCTestCase {
             Step(.send, .counter(.decrTapped)) { $0.count = 3 }
         )
         
-        // замена кода выше более коротко
+        // замена кода более коротко (выше)
 //        var state = CounterViewState(count: 2)
 //        var expected = state
 //        let effects = counterViewReducer(&state, .counter(.incrTapped))

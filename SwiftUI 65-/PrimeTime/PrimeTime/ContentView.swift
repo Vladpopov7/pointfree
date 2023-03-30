@@ -48,6 +48,7 @@ struct AppState {
     var activityFeed: [Activity] = []
     var alertNthPrime: PrimeAlert? = nil
     var isNthPrimeButtonDisabled: Bool = false
+    var isPrimeModalShown: Bool = false
     
     struct Activity {
         let timestamp: Date
@@ -144,7 +145,8 @@ extension AppState {
                 alertNthPrime: self.alertNthPrime,
                 count: self.count,
                 favoritePrimes: self.favoritePrimes,
-                isNthPrimeButtonDisabled: self.isNthPrimeButtonDisabled
+                isNthPrimeButtonDisabled: self.isNthPrimeButtonDisabled,
+                isPrimeModalShown: self.isPrimeModalShown
              )
         }
         set {
@@ -152,6 +154,7 @@ extension AppState {
             self.count = newValue.count
             self.favoritePrimes = newValue.favoritePrimes
             self.isNthPrimeButtonDisabled = newValue.isNthPrimeButtonDisabled
+            self.isPrimeModalShown = newValue.isPrimeModalShown
         }
     }
 }
