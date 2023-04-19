@@ -192,7 +192,10 @@ Result<Authentication, Error>.successCasePath
 
 \User.location.city
 
-infix operator ..
+precedencegroup Composition {
+    associativity: right
+}
+infix operator ..: Composition
 
 func .. <A, B, C> (
     lhs: CasePath<A, B>,
@@ -292,4 +295,161 @@ authentications
     }
 
 // It turns out, for case paths in particular we can do something different. We can magically derive the extract function for a case path from just the embed function that comes from the case of an enum. We say this is “magical” because it uses Swift’s runtime reflection capabilities.
-// If you are not familiar with the idea of reflection in programming, all you need to know is it allows you to inspect the internal structure of values and objects at runtime. For example, you can use reflection to get a list of all of the string names of stored properties that a struct has.
+// reflection allows you to inspect the internal structure of values and objects at runtime. For example, you can use reflection to get a list of all of the string names of stored properties that a struct has.
+
+func allProperties(_ value: Any) -> [String] {
+    let mirror = Mirror(reflecting: value)
+    return mirror.children.compactMap { child in child.label }
+}
+
+// все проперти структуры User
+allProperties(user)
+
+let auth = Authentication.authenticated(AccessToken(token: "deadbeef"))
+
+let mirror = Mirror(reflecting: auth)
+// dump - Dumps the given object’s contents using its mirror to standard output. (пишет в консоль)
+dump(mirror.children.first!)
+
+mirror.children.first!.value as? AccessToken
+
+func extractHelp<Root, Value>(
+    case: (Value) -> Root,
+    from root: Root
+) -> Value? {
+    let mirror = Mirror(reflecting: root)
+    guard let child = mirror.children.first else { return nil }
+    guard let value = child.value as? Value else { return nil }
+    
+    let newRoot = `case`(value)
+    let newMirror = Mirror(reflecting: newRoot)
+    guard let newChild = newMirror.children.first else { return nil }
+    guard newChild.label == child.label else { return nil }
+    
+    return value
+}
+
+extractHelp(case: Authentication.authenticated, from: auth)
+extractHelp(case: Authentication.authenticated, from: .unauthenticated)
+
+extractHelp(case: Result<Int, Error>.success, from: .success(42))
+
+struct MyError: Error {}
+
+extractHelp(case: Result<Int, Error>.failure, from: .failure(MyError()))
+
+enum Example {
+    case foo(Int)
+    case bar(Int)
+}
+
+Example.foo
+Example.bar
+
+extractHelp(case: Example.foo, from: .foo(2))
+// возвращает nil, так как case указали bar а from .foo
+extractHelp(case: Example.bar, from: .foo(2))
+
+mirror.children.first!.label
+
+extension CasePath {
+    init(_ embed: @escaping (Value) -> Root) {
+        self.embed = embed
+        self.extract = { root in extractHelp(case: embed, from: root) }
+    }
+}
+
+// case path from Example to foo Int
+CasePath(Example.foo)
+CasePath(Example.bar)
+CasePath(Result<Int, MyError>.success)
+
+enum ExampleWithArgumentLabels {
+    case foo(value: Int)
+}
+
+extractHelp(case: ExampleWithArgumentLabels.foo, from: .foo(value: 42))
+
+//extractHelp(case: Authentication.unauthenticated, from: .unauthenticated)
+
+let locationCountryCasePath = CasePath<Location, String>(
+    { country in Location(city: "Brooklyn", country: country) }
+)
+// we don't get the country, we get the city
+// This is of course silly because Location is a struct, and so it’s more appropriate to use key paths to focus on its parts rather than case paths. But still, nothing is preventing us from writing this strange code. And if we do that, the case path will not do what we expect:
+locationCountryCasePath.extract(user.location)
+
+CasePath(Result<Int, Error>.success)
+CasePath(Result<String, Error>.success)
+CasePath(Result<String, Error>.failure)
+CasePath(Result<String, NSError>.failure)
+
+CasePath(Optional<Int>.some)
+CasePath(Optional<String>.some)
+CasePath(Optional<[Int]>.some)
+
+CasePath(DispatchTimeInterval.seconds)
+CasePath(DispatchTimeInterval.milliseconds)
+CasePath(DispatchTimeInterval.microseconds)
+CasePath(DispatchTimeInterval.nanoseconds)
+
+CasePath(Subscribers.Completion<Error>.failure)
+
+prefix operator /
+
+prefix func / <Root, Value> (
+  case: @escaping (Value) -> Root
+) -> CasePath<Root, Value> {
+  CasePath(`case`)
+}
+
+\User.id
+/DispatchTimeInterval.seconds
+
+CasePath(DispatchTimeInterval.seconds)
+
+/Result<DispatchTimeInterval, Error>.success .. /DispatchTimeInterval.seconds
+
+enum LoadState<A> {
+    case loading
+    case offline
+    case loaded(Result<A, Error>)
+}
+
+/LoadState<Int>.loaded .. /Result.success
+
+let states1: [LoadState<Int>] = [
+    .loaded(.success(2)),
+    .loaded(.failure(NSError(domain: "", code: 1, userInfo: [:]))),
+    .loaded(.success(3)),
+    .loading,
+    .loaded(.success(4)),
+    .offline,
+]
+
+// [2, 3, 4]
+states1
+    .compactMap(^(/LoadState.loaded .. /Result.success))
+
+let states2: [LoadState<Authentication>] = [
+    .loading,
+    .loaded(.success(.authenticated(AccessToken(token: "deadbeef")))),
+    .loaded(.failure(NSError(domain: "", code: 1, userInfo: [:]))),
+    .loaded(.success(.authenticated(AccessToken(token: "cafed00d")))),
+    .loaded(.success(.unauthenticated)),
+    .offline,
+]
+
+/LoadState.loaded .. /Result.success .. /Authentication.authenticated
+/LoadState.loaded .. /Result.success .. /Authentication.authenticated
+
+// [{token "deadbeef"}, {token "cafed00d"}]
+states2
+    .compactMap(^(/LoadState.loaded .. /Result.success .. /Authentication.authenticated))
+
+// то же самое, но длиннее
+states2
+    .compactMap { state -> AccessToken? in
+        if case let .loaded(.success(.authenticated(accessToken))) = state { return accessToken }
+        return nil
+    }
