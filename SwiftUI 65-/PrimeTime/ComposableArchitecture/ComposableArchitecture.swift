@@ -135,33 +135,25 @@ public func combine<Value, Action>(
     }
 }
 
+//struct CasePath<Root, Value> {
+//    let extract: (Root) -> Value?
+//    let embed: (Value) -> Root
+//}
+
+import CasePaths
+
 public func pullback<LocalValue, GlobalValue, LocalAction, GlobalAction>(
     _ reducer: @escaping Reducer<LocalValue, LocalAction>,
     value: WritableKeyPath<GlobalValue, LocalValue>,
-    action: WritableKeyPath<GlobalAction, LocalAction?>
+    action: CasePath<GlobalAction, LocalAction>
 ) -> Reducer<GlobalValue, GlobalAction> {
     return { globalValue, globalAction in
-        guard let localAction = globalAction[keyPath: action] else { return [] }
+        guard let localAction = action.extract(from: globalAction) else { return [] }
         let localEffects = reducer(&globalValue[keyPath: value], localAction)
         
         return localEffects.map { localEffect in
-            localEffect.map { localAction -> GlobalAction in
-                var globalAction = globalAction
-                // key path is writable
-                globalAction[keyPath: action] = localAction
-                return globalAction
-            }
-            .eraseToEffect()
-//            Effect { callback in
-////                guard let localAction = logalEffect() else { return nil }
-//                localEffect.sink  { localAction in
-//                    // create a copy of globalAction
-//                    var globalAction = globalAction
-//                    // keyPath is writable
-//                    globalAction[keyPath: action] = localAction
-//                    callback(globalAction)
-//                }
-//            }
+            localEffect.map(action.embed)
+                .eraseToEffect()
         }
     }
 }

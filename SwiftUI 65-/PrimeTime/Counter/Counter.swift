@@ -96,10 +96,20 @@ extension CounterEnvironment {
     static let mock = CounterEnvironment(nthPrime: { _ in .sync { 17 }})
 }
 
+import CasePaths
+
 // комбинация двух pullback для экрана который может показывать modal экран
 public let counterViewReducer = combine(
-    pullback(counterReducer, value: \CounterViewState.counter, action: \CounterViewAction.counter),
-    pullback(primeModalReducer, value: \.primeModal, action: \.primeModal)
+    pullback(
+        counterReducer,
+        value: \CounterViewState.counter,
+        action: /CounterViewAction.counter
+    ),
+    pullback(
+        primeModalReducer,
+        value: \.primeModal,
+        action: /CounterViewAction.primeModal
+    )
 )
 
 public struct PrimeAlert: Equatable, Identifiable {
@@ -143,27 +153,27 @@ public enum CounterViewAction: Equatable {
     case counter(CounterAction)
     case primeModal(PrimeModalAction)
     
-    var counter: CounterAction? {
-        get {
-            guard case let .counter(value) = self else { return nil }
-            return value
-        }
-        set {
-            guard case .counter = self, let newValue = newValue else { return }
-            self = .counter(newValue)
-        }
-    }
-    
-    var primeModal: PrimeModalAction? {
-        get {
-            guard case let .primeModal(value) = self else { return nil }
-            return value
-        }
-        set {
-            guard case .primeModal = self, let newValue = newValue else { return }
-            self = .primeModal(newValue)
-        }
-    }
+//    var counter: CounterAction? {
+//        get {
+//            guard case let .counter(value) = self else { return nil }
+//            return value
+//        }
+//        set {
+//            guard case .counter = self, let newValue = newValue else { return }
+//            self = .counter(newValue)
+//        }
+//    }
+//
+//    var primeModal: PrimeModalAction? {
+//        get {
+//            guard case let .primeModal(value) = self else { return nil }
+//            return value
+//        }
+//        set {
+//            guard case .primeModal = self, let newValue = newValue else { return }
+//            self = .primeModal(newValue)
+//        }
+//    }
 }
 
 public struct CounterView: View {

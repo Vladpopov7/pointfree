@@ -75,27 +75,27 @@ enum AppAction {
     case favoritePrimes(FavoritePrimesAction)
     
     // это как keyPath, только для Actions (так как это enum)
-    var favoritePrimes: FavoritePrimesAction? {
-        get {
-            guard case let .favoritePrimes(value) = self else { return nil }
-            return value
-        }
-        set {
-            guard case .favoritePrimes = self, let newValue = newValue else { return }
-            self = .favoritePrimes(newValue)
-        }
-    }
-    
-    var counterView: CounterViewAction? {
-        get {
-            guard case let .counterView(value) = self else { return nil }
-            return value
-        }
-        set {
-            guard case .counterView = self, let newValue = newValue else { return }
-            self = .counterView(newValue)
-        }
-    }
+//    var favoritePrimes: FavoritePrimesAction? {
+//        get {
+//            guard case let .favoritePrimes(value) = self else { return nil }
+//            return value
+//        }
+//        set {
+//            guard case .favoritePrimes = self, let newValue = newValue else { return }
+//            self = .favoritePrimes(newValue)
+//        }
+//    }
+//    
+//    var counterView: CounterViewAction? {
+//        get {
+//            guard case let .counterView(value) = self else { return nil }
+//            return value
+//        }
+//        set {
+//            guard case .counterView = self, let newValue = newValue else { return }
+//            self = .counterView(newValue)
+//        }
+//    }
 }
 
 struct _KeyPath<Root, Value> {
@@ -108,6 +108,24 @@ struct EnumKeyPath<Root, Value> {
     let extract: (Root) -> Value?
 }
 // \AppAction.counter // EnumKeyPath<AppAction, CounterAppAction>
+
+import CasePaths
+
+//let _appReducer: (inout AppState, AppAction) -> Void = combine(
+let appReducer = combine(
+    pullback(
+        counterViewReducer,
+        value: \AppState.counterView,
+        action: CasePath(AppAction.counterView)
+    ),
+    pullback(
+        favoritePrimesReducer,
+        value: \.favoritePrimes,
+        action: CasePath(AppAction.favoritePrimes)
+    )
+)
+// \.self represents the key path from AppState to AppState where the getter just returns self and the setter just replaces itself with the new value coming in. This pullback has not changed the app reducer at all, the _appReducer and the appReducer behave exactly the same.
+//let appReducer = pullback(_appReducer, value: \.self, action: \.self)
 
 // higher order function
 func activityFeed(
@@ -158,14 +176,6 @@ extension AppState {
         }
     }
 }
-
-//let _appReducer: (inout AppState, AppAction) -> Void = combine(
-let appReducer = combine(
-    pullback(counterViewReducer, value: \AppState.counterView, action: \AppAction.counterView),
-    pullback(favoritePrimesReducer, value: \.favoritePrimes, action: \.favoritePrimes)
-)
-// \.self represents the key path from AppState to AppState where the getter just returns self and the setter just replaces itself with the new value coming in. This pullback has not changed the app reducer at all, the _appReducer and the appReducer behave exactly the same.
-//let appReducer = pullback(_appReducer, value: \.self, action: \.self)
 
 var state = AppState()
 

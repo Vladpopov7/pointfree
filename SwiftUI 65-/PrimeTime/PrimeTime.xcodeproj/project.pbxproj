@@ -47,6 +47,7 @@
 		12653F6E29AD208B00CD77F8 /* FavoritePrimes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12653F6D29AD208B00CD77F8 /* FavoritePrimes.swift */; };
 		12653F7029AD21F200CD77F8 /* Counter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12653F6F29AD21F200CD77F8 /* Counter.swift */; };
 		12653F7229AD22D600CD77F8 /* PrimeModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12653F7129AD22D600CD77F8 /* PrimeModal.swift */; };
+		12C9D2B629F96D8100489BA2 /* CasePaths in Frameworks */ = {isa = PBXBuildFile; productRef = 12C9D2B529F96D8100489BA2 /* CasePaths */; };
 		12F4316929B3B8AC00D24F1C /* Effects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F4316829B3B8AC00D24F1C /* Effects.swift */; };
 /* End PBXBuildFile section */
 
@@ -296,6 +297,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				12C9D2B629F96D8100489BA2 /* CasePaths in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -687,6 +689,9 @@
 			dependencies = (
 			);
 			name = ComposableArchitecture;
+			packageProductDependencies = (
+				12C9D2B529F96D8100489BA2 /* CasePaths */,
+			);
 			productName = ComposableArchitecture;
 			productReference = 12653F4E29AD07E800CD77F8 /* ComposableArchitecture.framework */;
 			productType = "com.apple.product-type.framework";
@@ -769,6 +774,7 @@
 			mainGroup = 12653EAA29AD03A900CD77F8;
 			packageReferences = (
 				122122D129C21F6D005B492D /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+				12C9D2B429F96D8100489BA2 /* XCRemoteSwiftPackageReference "swift-case-paths" */,
 			);
 			productRefGroup = 12653EB429AD03A900CD77F8 /* Products */;
 			projectDirPath = "";
@@ -1802,6 +1808,14 @@
 				minimumVersion = 1.6.0;
 			};
 		};
+		12C9D2B429F96D8100489BA2 /* XCRemoteSwiftPackageReference "swift-case-paths" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-case-paths";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1809,6 +1823,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 122122D129C21F6D005B492D /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
 			productName = SnapshotTesting;
+		};
+		12C9D2B529F96D8100489BA2 /* CasePaths */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 12C9D2B429F96D8100489BA2 /* XCRemoteSwiftPackageReference "swift-case-paths" */;
+			productName = CasePaths;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
