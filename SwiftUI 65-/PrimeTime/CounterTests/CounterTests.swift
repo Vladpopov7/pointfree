@@ -27,6 +27,7 @@ extension Snapshotting where Value: UIViewController, Format == UIImage {
 class CounterTests: XCTestCase {
     override class func setUp() {
         super.setUp()
+        // it completely mocks out the environment for all of our tests in this file
         Current = .mock
     }
     
@@ -179,6 +180,8 @@ class CounterTests: XCTestCase {
     }
 
     func testPrimeModal() {
+        Current = .mock
+        
         assert(
             initialValue: CounterViewState(
                 count: 2,

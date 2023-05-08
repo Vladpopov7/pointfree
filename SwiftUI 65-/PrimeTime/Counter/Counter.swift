@@ -1,3 +1,4 @@
+import Combine
 import ComposableArchitecture
 import PrimeModal
 import SwiftUI
@@ -6,7 +7,7 @@ public enum CounterAction: Equatable {
     case decrTapped
     case incrTapped
     case nthPrimeButtonTapped
-    case nthPrimeResponse(Int?)
+    case nthPrimeResponse(n: Int, prime: Int?)
     case alertDismissButtonTapped
     case isPrimeButtonTapped
     case primeModalDismissed
@@ -23,7 +24,17 @@ public func counterReducer(state: inout CounterState, action: CounterAction) -> 
     switch action {
     case .decrTapped:
         state.count -= 1
-        return []
+        let count = state.count
+        return [
+            .fireAndForget {
+                print(count)
+            },
+            
+            // wait for 1 second every time we decrement and then increment, this functionality just for presentation
+            Just(CounterAction.incrTapped)
+                .delay(for: 1, scheduler: DispatchQueue.main)
+                .eraseToEffect()
+        ]
         
     case .incrTapped:
         state.count += 1
@@ -31,14 +42,14 @@ public func counterReducer(state: inout CounterState, action: CounterAction) -> 
         
     case .nthPrimeButtonTapped:
         state.isNthPrimeButtonDisabled = true
-        // создавать копию больше не нужно, потому что nthPrime сразу берет копию как параметр
-//        let count = state.count
+        let n = state.count
         return [
 //            nthPrime(state.count)
             Current.nthPrime(state.count)
 //                .map { CounterAction.nthPrimeResponse($0)}
                 // так короче:
-                .map(CounterAction.nthPrimeResponse)
+//                .map(CounterAction.nthPrimeResponse)
+                .map { CounterAction.nthPrimeResponse(n: n, prime: $0) }
                 .receive(on: DispatchQueue.main)
                 .eraseToEffect()
 
@@ -63,8 +74,8 @@ public func counterReducer(state: inout CounterState, action: CounterAction) -> 
 //                //            return .nthPrimeResponse(p)
 //            }
         ]
-    case let .nthPrimeResponse(prime):
-        state.alertNthPrime = prime.map(PrimeAlert.init(prime:))
+    case let .nthPrimeResponse(n, prime):
+        state.alertNthPrime = prime.map { PrimeAlert(n: n, prime: $0) }
         state.isNthPrimeButtonDisabled = false
         return []
         
@@ -113,8 +124,14 @@ public let counterViewReducer = combine(
 )
 
 public struct PrimeAlert: Equatable, Identifiable {
-    let prime: Int
+    public let n: Int
+    public let prime: Int
     public var id: Int { self.prime }
+    
+    public init(n: Int, prime: Int) {
+        self.n = n
+        self.prime = prime
+    }
 }
 
 public struct CounterViewState: Equatable {
