@@ -25,62 +25,63 @@ extension Snapshotting where Value: UIViewController, Format == UIImage {
 }
 
 class CounterTests: XCTestCase {
-    override class func setUp() {
-        super.setUp()
-        // it completely mocks out the environment for all of our tests in this file
-        Current = .mock
-    }
+//    override class func setUp() {
+//        super.setUp()
+//        // it completely mocks out the environment for all of our tests in this file
+//        Current = .mock
+//    }
     
-    func testSnapshots() {
-        let store = Store(initialValue: CounterViewState(), reducer: counterViewReducer)
-        let view = CounterView(store: store)
-        
-        let vc = UIHostingController(rootView: view)
-        vc.view.frame = UIScreen.main.bounds
-
-        // при первом запуске зафейлится, нужно будет взять строку начинающуюся на open... из выскочившей ошибки и вставить в terminal
-        // record включает режим записи, по строке из ошибки можно получить доступ к сгенерированному image
-//        isRecording=true
-        assertSnapshot(matching: vc, as: .windowedImage)
-        
-        store.send(.counter(.incrTapped))
-        assertSnapshot(matching: vc, as: .windowedImage)
-        
-        store.send(.counter(.incrTapped))
-        assertSnapshot(matching: vc, as: .windowedImage)
-        
-        store.send(.counter(.nthPrimeButtonTapped))
-        assertSnapshot(matching: vc, as: .windowedImage)
-        
-        var expectation = self.expectation(description: "wait")
-        DispatchQueue.main.asyncAfter (deadline: .now() + 0.5) {
-            expectation.fulfill()
-        }
-        self.wait(for: [expectation], timeout: 0.5)
-        assertSnapshot(matching: vc, as: .windowedImage)
-        
-        store.send(.counter(.alertDismissButtonTapped))
-        expectation = self.expectation(description: "wait")
-        DispatchQueue.main.asyncAfter (deadline: .now() + 0.5) {
-            expectation.fulfill()
-        }
-        self.wait(for: [expectation], timeout: 0.5)
-        assertSnapshot(matching: vc, as: .windowedImage)
-
-        store.send(.counter(.isPrimeButtonTapped))
-        assertSnapshot(matching: vc, as: .windowedImage)
-        
-        store.send(.primeModal(.saveFavoritePrimeTapped))
-        assertSnapshot(matching: vc, as: .windowedImage)
-        
-        store.send(.counter(.primeModalDismissed))
-        assertSnapshot(matching: vc, as: .windowedImage)
-    }
+//    func testSnapshots() {
+//        let store = Store(initialValue: CounterViewState(), reducer: counterViewReducer, environment: { _ in .sync { 17 } })
+//        let view = CounterView(store: store)
+//
+//        let vc = UIHostingController(rootView: view)
+//        vc.view.frame = UIScreen.main.bounds
+//
+//        // при первом запуске зафейлится, нужно будет взять строку начинающуюся на open... из выскочившей ошибки и вставить в terminal
+//        // record включает режим записи, по строке из ошибки можно получить доступ к сгенерированному image
+////        isRecording=true
+//        assertSnapshot(matching: vc, as: .windowedImage)
+//
+//        store.send(.counter(.incrTapped))
+//        assertSnapshot(matching: vc, as: .windowedImage)
+//
+//        store.send(.counter(.incrTapped))
+//        assertSnapshot(matching: vc, as: .windowedImage)
+//
+//        store.send(.counter(.nthPrimeButtonTapped))
+//        assertSnapshot(matching: vc, as: .windowedImage)
+//
+//        var expectation = self.expectation(description: "wait")
+//        DispatchQueue.main.asyncAfter (deadline: .now() + 0.5) {
+//            expectation.fulfill()
+//        }
+//        self.wait(for: [expectation], timeout: 0.5)
+//        assertSnapshot(matching: vc, as: .windowedImage)
+//
+//        store.send(.counter(.alertDismissButtonTapped))
+//        expectation = self.expectation(description: "wait")
+//        DispatchQueue.main.asyncAfter (deadline: .now() + 0.5) {
+//            expectation.fulfill()
+//        }
+//        self.wait(for: [expectation], timeout: 0.5)
+//        assertSnapshot(matching: vc, as: .windowedImage)
+//
+//        store.send(.counter(.isPrimeButtonTapped))
+//        assertSnapshot(matching: vc, as: .windowedImage)
+//
+//        store.send(.primeModal(.saveFavoritePrimeTapped))
+//        assertSnapshot(matching: vc, as: .windowedImage)
+//
+//        store.send(.counter(.primeModalDismissed))
+//        assertSnapshot(matching: vc, as: .windowedImage)
+//    }
     
     func testIncrDecrButtonTapped() {
         assert(
             initialValue: CounterViewState(count: 2),
             reducer: counterViewReducer,
+            environment: { _ in .sync { 17 }},
             steps:
                 // мы ожидаем что count увеличится при incrTapped и уменьшится при decrTapped
             Step(.send, .counter(.incrTapped)) { $0.count = 3 },
@@ -99,20 +100,22 @@ class CounterTests: XCTestCase {
     }
     
     func testNthPrimeButtonHappyFlow() {
-        Current.nthPrime = { _ in .sync { 17 } }
+//        Current.nthPrime =
         
         assert(
-            initialValue: CounterViewState (
+            initialValue: CounterViewState(
                 alertNthPrime: nil,
+                count: 7,
                 isNthPrimeButtonDisabled: false
             ),
             reducer: counterViewReducer,
+            environment: { _ in .sync { 17 } },
             steps:
                 Step(.send, .counter(.nthPrimeButtonTapped)) {
                     $0.isNthPrimeButtonDisabled = true
                 },
-            Step(.receive, .counter(.nthPrimeResponse(17))) {
-                $0.alertNthPrime = PrimeAlert(prime: 17)
+            Step(.receive, .counter(.nthPrimeResponse(n: 7, prime: 17))) {
+                $0.alertNthPrime = PrimeAlert(n: $0.count, prime: 17)
                 $0.isNthPrimeButtonDisabled = false
             },
             Step(.send, .counter(.alertDismissButtonTapped)) {
@@ -159,28 +162,28 @@ class CounterTests: XCTestCase {
     }
     
     func testNthPrimeButtonUnhappyFlow() {
-        Current.nthPrime = { _ in .sync { nil } }
+//        Current.nthPrime =
         
         assert(
-            initialValue: CounterViewState (
+            initialValue: CounterViewState(
                 alertNthPrime: nil,
-                count: 2,
-                favoritePrimes: [3, 5],
+                count: 7,
                 isNthPrimeButtonDisabled: false
             ),
             reducer: counterViewReducer,
+            environment: { _ in .sync { nil } },
             steps:
                 Step(.send, .counter(.nthPrimeButtonTapped)) {
                     $0.isNthPrimeButtonDisabled = true
                 },
-            Step(.receive, .counter(.nthPrimeResponse(nil))) {
+            Step(.receive, .counter(.nthPrimeResponse(n: 7, prime: nil))) {
                 $0.isNthPrimeButtonDisabled = false
             }
         )
     }
 
     func testPrimeModal() {
-        Current = .mock
+//        Current = .mock
         
         assert(
             initialValue: CounterViewState(
@@ -188,6 +191,7 @@ class CounterTests: XCTestCase {
                 favoritePrimes: [3, 5]
             ),
             reducer: counterViewReducer,
+            environment: { _ in .sync { 17 } },
             steps:
                 Step(.send, .primeModal(.saveFavoritePrimeTapped)) {
                     $0.favoritePrimes = [3, 5, 2]

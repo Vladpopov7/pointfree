@@ -9,7 +9,11 @@ public enum FavoritePrimesAction: Equatable {
     case saveButtonTapped
 }
 
-public func favoritePrimesReducer(state: inout [Int], action: FavoritePrimesAction) -> [Effect<FavoritePrimesAction>] {
+public func favoritePrimesReducer(
+    state: inout [Int],
+    action: FavoritePrimesAction,
+    environment: FavoritePrimesEnvironment
+) -> [Effect<FavoritePrimesAction>] {
     switch action {
     case let .deleteFavoritePrimes(indexSet):
         for index in indexSet {
@@ -25,7 +29,7 @@ public func favoritePrimesReducer(state: inout [Int], action: FavoritePrimesActi
         // избегаем ошибки @escaping closure captures 'inout' parameter 'state' создавая копию state, но это больше не нужно так как создали функцию saveEffect и она не принимает inout параметр
 //        let state = state
         return [
-            Current.fileClient.save("favorite-primes.json", try! JSONEncoder().encode(state))
+            environment.save("favorite-primes.json", try! JSONEncoder().encode(state))
             // map from Effect<Never> to Effect<FavoritePrimesAction> (upcasting to the type), но при этом FavoritePrimesAction будет как Never, т.е. он не будет инициализироваться видимо
                 .fireAndForget()
 //            saveEffect(favoritePrimes: state)
@@ -33,7 +37,7 @@ public func favoritePrimesReducer(state: inout [Int], action: FavoritePrimesActi
         
     case .loadButtonTapped:
         return [
-            Current.fileClient.load("favorite-primes.json")
+            environment.load("favorite-primes.json")
                 .compactMap { $0 }
                 .decode(type: [Int].self, decoder: JSONDecoder())
                 .catch { error in Empty(completeImmediately: true) }
@@ -63,13 +67,13 @@ func absurd<A>(_ never: Never) -> A {
 //    switch never {}
 }
 
-struct FileClient {
+public struct FileClient {
     var load: (String) -> Effect<Data?>
     var save: (String, Data) -> Effect<Never>
 }
 
 extension FileClient {
-    static let live = FileClient(
+    public static let live = FileClient(
         load: { fileName -> Effect<Data?> in
             .sync {
                 let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
@@ -91,24 +95,28 @@ extension FileClient {
 }
 
 // Dependency injection:
-struct FavoritePrimesEnvironment {
-    var fileClient: FileClient
-}
-extension FavoritePrimesEnvironment {
-    static let live = FavoritePrimesEnvironment(fileClient: .live)
-}
+//public struct FavoritePrimesEnvironment {
+//    var fileClient: FileClient
+//}
+public typealias FavoritePrimesEnvironment = FileClient
+// we can extend in the future like this:
+//public typealias FavoritePrimesEnvironment = (fileClient: FileClient, someOther: SomeOther, etc...)
 
-var Current = FavoritePrimesEnvironment.live
+//extension FavoritePrimesEnvironment {
+//    public static let live = FavoritePrimesEnvironment(fileClient: .live)
+//}
+
+// we don't need global environment here, because we use environment parameter
+//var Current = FavoritePrimesEnvironment.live
 
 #if DEBUG
-extension FavoritePrimesEnvironment {
-    static let mock = FavoritePrimesEnvironment (
-        fileClient: FileClient (
-            load: { _ in Effect<Data?>.sync {
-                try! JSONEncoder().encode ([2, 31])
-            } },
-            save: { _, _ in .fireAndForget {} }
-        )
+//extension FavoritePrimesEnvironment {
+extension FileClient {
+    static let mock = FileClient(
+        load: { _ in Effect<Data?>.sync {
+            try! JSONEncoder().encode ([2, 31])
+        } },
+        save: { _, _ in .fireAndForget {} }
     )
 }
 #endif

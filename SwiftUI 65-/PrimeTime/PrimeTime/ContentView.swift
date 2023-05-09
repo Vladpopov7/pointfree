@@ -111,17 +111,31 @@ struct EnumKeyPath<Root, Value> {
 
 import CasePaths
 
+//struct AppEnvironment {
+//    var counter: CounterEnvironment
+//    var favoritePrimes: FavoritePrimesEnvironment
+//}
+
+typealias AppEnvironment = (
+    fileClient: FileClient,
+    nthPrime: (Int) -> Effect<Int?>
+)
+
 //let _appReducer: (inout AppState, AppAction) -> Void = combine(
-let appReducer = combine(
+let appReducer: Reducer<AppState, AppAction, AppEnvironment> = combine(
     pullback(
         counterViewReducer,
         value: \AppState.counterView,
-        action: CasePath(AppAction.counterView)
+        action: CasePath(AppAction.counterView),
+        environment: { $0.nthPrime }
+        // we can extend in the future:
+        // environment: { ($0.nthPrime, $0.someOther) }
     ),
     pullback(
         favoritePrimesReducer,
         value: \.favoritePrimes,
-        action: CasePath(AppAction.favoritePrimes)
+        action: CasePath(AppAction.favoritePrimes),
+        environment: { $0.fileClient }
     )
 )
 // \.self represents the key path from AppState to AppState where the getter just returns self and the setter just replaces itself with the new value coming in. This pullback has not changed the app reducer at all, the _appReducer and the appReducer behave exactly the same.
@@ -129,10 +143,10 @@ let appReducer = combine(
 
 // higher order function
 func activityFeed(
-    _ reducer: @escaping Reducer<AppState, AppAction>
-) -> Reducer<AppState, AppAction> {
+    _ reducer: @escaping Reducer<AppState, AppAction, AppEnvironment>
+) -> Reducer<AppState, AppAction, AppEnvironment> {
     
-    return { state, action in
+    return { state, action, environment in
         switch action {
         case .counterView(.counter),
                 .favoritePrimes(.loadedFavoritePrimes),
@@ -152,7 +166,7 @@ func activityFeed(
             }
         }
 
-        return reducer(&state, action)
+        return reducer(&state, action, environment)
     }
 }
 
@@ -212,19 +226,19 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView(
-            store: Store(
-                initialValue: AppState(),
-                reducer: with(
-                    appReducer,
-                    compose(
-                        logging,
-                        activityFeed
-                    )
-                )
-            )
-        )
-    }
-}
+//struct ContentView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ContentView(
+//            store: Store(
+//                initialValue: AppState(),
+//                reducer: with(
+//                    appReducer,
+//                    compose(
+//                        logging,
+//                        activityFeed
+//                    )
+//                )
+//            )
+//        )
+//    }
+//}

@@ -20,7 +20,7 @@ struct WolframAlphaResult: Decodable {
 }
 
 // сделали возврат Effect вместо параметра callback, и внутрь Effect передаем callback
-func nthPrime(_ n: Int) -> Effect<Int?> {
+public func nthPrime(_ n: Int) -> Effect<Int?> {
 //, callback: @escaping (Int?) -> Void) -> Void {
     return wolframAlpha(query: "prime \(n)").map { result in
         result

@@ -20,20 +20,24 @@ public typealias CounterState = (
     isPrimeModalShown: Bool
 )
 
-public func counterReducer(state: inout CounterState, action: CounterAction) -> [Effect<CounterAction>] {
+public func counterReducer(
+    state: inout CounterState,
+    action: CounterAction,
+    environment: CounterEnvironment
+) -> [Effect<CounterAction>] {
     switch action {
     case .decrTapped:
         state.count -= 1
         let count = state.count
         return [
-            .fireAndForget {
-                print(count)
-            },
-            
-            // wait for 1 second every time we decrement and then increment, this functionality just for presentation
-            Just(CounterAction.incrTapped)
-                .delay(for: 1, scheduler: DispatchQueue.main)
-                .eraseToEffect()
+//            .fireAndForget {
+//                print(count)
+//            },
+//            
+//            // wait for 1 second every time we decrement and then increment, this functionality just for presentation
+//            Just(CounterAction.incrTapped)
+//                .delay(for: 1, scheduler: DispatchQueue.main)
+//                .eraseToEffect()
         ]
         
     case .incrTapped:
@@ -45,7 +49,7 @@ public func counterReducer(state: inout CounterState, action: CounterAction) -> 
         let n = state.count
         return [
 //            nthPrime(state.count)
-            Current.nthPrime(state.count)
+            environment(state.count)
 //                .map { CounterAction.nthPrimeResponse($0)}
                 // так короче:
 //                .map(CounterAction.nthPrimeResponse)
@@ -93,33 +97,37 @@ public func counterReducer(state: inout CounterState, action: CounterAction) -> 
     }
 }
 
-struct CounterEnvironment {
-    var nthPrime: (Int) -> Effect<Int?>
-}
+//public struct CounterEnvironment {
+//    var nthPrime: (Int) -> Effect<Int?>
+//}
+public typealias CounterEnvironment = (Int) -> Effect<Int?>
 
-extension CounterEnvironment {
-    static let live = CounterEnvironment(nthPrime: Counter.nthPrime)
-}
+//extension CounterEnvironment {
+//    public static let live = CounterEnvironment(nthPrime: Counter.nthPrime)
+//}
 
-var Current = CounterEnvironment.live
+//var Current = CounterEnvironment.live
 
-extension CounterEnvironment {
-    static let mock = CounterEnvironment(nthPrime: { _ in .sync { 17 }})
-}
+//extension CounterEnvironment {
+//    static let mock = CounterEnvironment(nthPrime: { _ in .sync { 17 }})
+//}
 
 import CasePaths
 
 // комбинация двух pullback для экрана который может показывать modal экран
-public let counterViewReducer = combine(
+public let counterViewReducer: Reducer<CounterViewState, CounterViewAction, CounterEnvironment> = combine(
     pullback(
         counterReducer,
         value: \CounterViewState.counter,
-        action: /CounterViewAction.counter
+        action: /CounterViewAction.counter,
+        environment: { $0 }
     ),
     pullback(
         primeModalReducer,
         value: \.primeModal,
-        action: /CounterViewAction.primeModal
+        action: /CounterViewAction.primeModal,
+        // Void environment
+        environment: { _ in () }
     )
 )
 

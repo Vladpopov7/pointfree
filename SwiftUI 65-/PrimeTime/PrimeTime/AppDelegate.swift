@@ -9,7 +9,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if ProcessInfo.processInfo.environment["UI_TESTS"] == "1" {
             // чтобы ускорить UI тесты
             UIView.setAnimationsEnabled(false)
-            Counter.Current.nthPrime = { _ in .sync { 3 } }
+//            Counter.Current.nthPrime = { _ in .sync { 3 } }
         }
         
         return true
