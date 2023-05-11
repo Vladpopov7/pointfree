@@ -12,6 +12,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
       window.rootViewController = UIHostingController(
         rootView: ContentView(
           store: Store(
+            // если добавить большое значение count, то offline расчет будет медленным и главная очередь будет загружена
+//            initialValue: AppState(count: 40_000),
             initialValue: AppState(),
             // добавили функционал отслеживания activityFeed, вместо того чтобы просто передать appReducer, и так же logging. Но так как при дальнейшем добавлении других функций цепочка может стать слишком длинной, поэтому используаем функции with и compose из их библиотеки и в дальнейшем просто сможем добавлять функции как параметры в compose функцию по порядку (aspect oriented programming)
 //            reducer: logging(activityFeed(appReducer))
@@ -24,7 +26,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             ),
             environment: AppEnvironment(
                 fileClient: .live,
-                nthPrime: Counter.nthPrime
+                nthPrime: Counter.nthPrime,
+                offlineNthPrime: Counter.offlineNthPrime
 //                counter: .live,
 //                favoritePrimes: .live
             )

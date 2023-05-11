@@ -1,25 +1,24 @@
-import Combine
 import ComposableArchitecture
 import XCTest
 
-enum StepType {
+public enum StepType {
     case send
     case receive
 }
 
-struct Step<Value, Action> {
+public struct Step<Value, Action> {
     let type: StepType
     let action: Action
     let update: (inout Value) -> Void
     let file: StaticString
     let line: UInt
     
-    init(
+    public init(
         _ type: StepType,
         _ action: Action,
         file: StaticString = #file,
         line: UInt = #line,
-        _ update: @escaping (inout Value) -> Void
+        _ update: @escaping (inout Value) -> Void = { _ in }
     ) {
         self.type = type
         self.action = action
@@ -29,19 +28,17 @@ struct Step<Value, Action> {
     }
 }
 
-func assert<Value: Equatable, Action: Equatable, Environment>(
+public func assert<Value: Equatable, Action: Equatable, Environment>(
     initialValue: Value,
     reducer: Reducer<Value, Action, Environment>,
     environment: Environment,
     steps: Step<Value, Action>...,
-    // для отображения возникающих ошибок в правильном файле и line кода
     file: StaticString = #file,
     line: UInt = #line
 ) {
     var state = initialValue
     var effects: [Effect<Action>] = []
-    var cancellables: [AnyCancellable] = []
-
+    
     steps.forEach { step in
         var expected = state
         
@@ -59,18 +56,13 @@ func assert<Value: Equatable, Action: Equatable, Environment>(
             }
             let effect = effects.removeFirst()
             var action: Action!
-            // так как мы не внутри класса наследника XCTestCase, то мы не можем просо вызывать expectation функцию
             let receivedCompletion = XCTestExpectation(description: "receivedCompletion")
-            // мы ожидаем что receiveValue и receiveCompletion выполнятся immediately поэтому не используем cancellable
-            cancellables.append(
-                effect.sink(
-                    receiveCompletion: { _ in
-                        receivedCompletion.fulfill()
-                    },
-                    receiveValue: { action = $0 }
-                )
+            let e = effect.sink(
+                receiveCompletion: { _ in
+                    receivedCompletion.fulfill()
+                },
+                receiveValue: { action = $0 }
             )
-            // так как мы не внутри класса наследника XCTestCase, то мы не можем просо вызывать wait функцию
             if XCTWaiter.wait(for: [receivedCompletion], timeout: 0.01) != .completed {
                 XCTFail("Timed out waiting for the effect to complete", file: step.file, line: step.line)
             }
@@ -82,6 +74,6 @@ func assert<Value: Equatable, Action: Equatable, Environment>(
         XCTAssertEqual(state, expected, file: step.file, line: step.line)
     }
     if !effects.isEmpty {
-        XCTFail( "Assertion failed to handle \(effects.count) pending effect(s)", file: file, line: line)
+        XCTFail("Assertion failed to handle \(effects.count) pending effect(s)", file: file, line: line)
     }
 }

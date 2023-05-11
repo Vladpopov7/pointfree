@@ -1,3 +1,5 @@
+import Combine
+import ComposableArchitecture
 import Foundation
 
 private let wolframAlphaApiKey = "6H69Q3-828TKQJ4EP"
@@ -35,6 +37,30 @@ public func nthPrime(_ n: Int) -> Effect<Int?> {
             .flatMap(Int.init)
     }
     .eraseToEffect()
+}
+
+public func offlineNthPrime(_ n: Int) -> Effect<Int?> {
+    Future { callback in
+        var nthPrime = 1
+        var count = 0
+        while count < n {
+            nthPrime += 1
+            if isPrime(nthPrime) {
+                count += 1
+            }
+        }
+        callback(.success(nthPrime))
+    }
+    .eraseToEffect()
+}
+
+func isPrime(_ p: Int) -> Bool {
+    if p <= 1 { return false }
+    if p <= 3 { return true }
+    for i in 2...Int(sqrtf(Float(p))) {
+        if p % i == 0 { return false }
+    }
+    return true
 }
 
 import ComposableArchitecture

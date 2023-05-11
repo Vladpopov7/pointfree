@@ -2,6 +2,7 @@ import XCTest
 @testable import Counter
 import SnapshotTesting
 import ComposableArchitecture
+import ComposableArchitectureTestSupport
 import SwiftUI
 
 

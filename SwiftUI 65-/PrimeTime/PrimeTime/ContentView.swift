@@ -9,6 +9,7 @@ import Combine
 import ComposableArchitecture
 import Counter
 import FavoritePrimes
+import PrimeAlert
 import SwiftUI
 
 // BindableObject is deprecated
@@ -26,7 +27,15 @@ import SwiftUI
 // ObservableObject - This protocol utilizes an objectWillChange property of ObservableObjectPublisher, which is pinged before (not after) any mutations are made to your model
 // let objectDidChange = ObservableObjectPublisher()
 // This boilerplate is also not necessary, as the ObservableObject protocol will synthesize a default publisher for you automatically.
-struct AppState {
+struct AppState: Equatable {
+    var favoritePrimesState: FavoritePrimesState {
+        get {
+            (self.alertNthPrime, self.favoritePrimes)
+        }
+        set {
+            (self.alertNthPrime, self.favoritePrimes) = newValue
+        }
+    }
 //    With Xcode 11 beta 5 and later, willSet should be used instead of didSet:
 //    var count = 0 {
 //      willSet {
@@ -50,17 +59,17 @@ struct AppState {
     var isNthPrimeButtonDisabled: Bool = false
     var isPrimeModalShown: Bool = false
     
-    struct Activity {
+    struct Activity: Equatable {
         let timestamp: Date
         let type: ActivityType
         
-        enum ActivityType {
+        enum ActivityType: Equatable {
             case addedFavoritePrime(Int)
             case removedFavoritePrime(Int)
         }
     }
     
-    struct User {
+    struct User: Equatable {
         let id: Int
         let name: String
         let bio: String
@@ -68,10 +77,11 @@ struct AppState {
 }
 
 // this action nests other actions for different screens
-enum AppAction {
+enum AppAction: Equatable {
 //    case counter(CounterAction)
 //    case primeModal(PrimeModalAction)
     case counterView(CounterViewAction)
+    case offlineCounterView(CounterViewAction)
     case favoritePrimes(FavoritePrimesAction)
     
     // это как keyPath, только для Actions (так как это enum)
@@ -118,7 +128,8 @@ import CasePaths
 
 typealias AppEnvironment = (
     fileClient: FileClient,
-    nthPrime: (Int) -> Effect<Int?>
+    nthPrime: (Int) -> Effect<Int?>,
+    offlineNthPrime: (Int) -> Effect<Int?>
 )
 
 //let _appReducer: (inout AppState, AppAction) -> Void = combine(
@@ -126,16 +137,22 @@ let appReducer: Reducer<AppState, AppAction, AppEnvironment> = combine(
     pullback(
         counterViewReducer,
         value: \AppState.counterView,
-        action: CasePath(AppAction.counterView),
+        action: /AppAction.counterView,
         environment: { $0.nthPrime }
         // we can extend in the future:
         // environment: { ($0.nthPrime, $0.someOther) }
     ),
     pullback(
+        counterViewReducer,
+        value: \AppState.counterView,
+        action: /AppAction.offlineCounterView,
+        environment: { $0.offlineNthPrime }
+    ),
+    pullback(
         favoritePrimesReducer,
-        value: \.favoritePrimes,
-        action: CasePath(AppAction.favoritePrimes),
-        environment: { $0.fileClient }
+        value: \.favoritePrimesState,
+        action: /AppAction.favoritePrimes,
+        environment: { ($0.fileClient, $0.nthPrime) }
     )
 )
 // \.self represents the key path from AppState to AppState where the getter just returns self and the setter just replaces itself with the new value coming in. This pullback has not changed the app reducer at all, the _appReducer and the appReducer behave exactly the same.
@@ -149,15 +166,21 @@ func activityFeed(
     return { state, action, environment in
         switch action {
         case .counterView(.counter),
+                .offlineCounterView(.counter),
                 .favoritePrimes(.loadedFavoritePrimes),
                 .favoritePrimes(.loadButtonTapped),
-                .favoritePrimes(.saveButtonTapped):
+                .favoritePrimes(.saveButtonTapped),
+                .favoritePrimes(.primeButtonTapped),
+                .favoritePrimes(.nthPrimeResponse),
+                .favoritePrimes(.alertDismissButtonTapped):
             break
             
-        case .counterView(.primeModal(.removeFavoritePrimeTapped)):
+        case .counterView(.primeModal(.removeFavoritePrimeTapped)),
+                .offlineCounterView(.primeModal(.removeFavoritePrimeTapped)):
             state.activityFeed.append(.init(timestamp: Date(), type: .removedFavoritePrime(state.count)))
             
-        case .counterView(.primeModal(.saveFavoritePrimeTapped)):
+        case .counterView(.primeModal(.saveFavoritePrimeTapped)),
+                .offlineCounterView(.primeModal(.saveFavoritePrimeTapped)):
             state.activityFeed.append(.init(timestamp: Date(), type: .addedFavoritePrime(state.count)))
             
         case let .favoritePrimes(.deleteFavoritePrimes(indexSet)):
@@ -193,27 +216,42 @@ extension AppState {
 
 var state = AppState()
 
+let isInExperiment = Bool.random()
+
 struct ContentView: View {
     @ObservedObject var store: Store<AppState, AppAction>
     
     var body: some View {
         NavigationView {
             List {
-                NavigationLink(
-                    "Counter demo",
-                    destination: CounterView(
-                        store: self.store
-                            .view(
-                                value: { $0.counterView },
-                                action: { .counterView($0) }
-                            )
+                if !isInExperiment {
+                    NavigationLink(
+                        "Counter demo",
+                        destination: CounterView(
+                            store: self.store
+                                .view(
+                                    value: { $0.counterView },
+                                    action: { .counterView($0) }
+                                )
+                        )
                     )
-                )
+                } else {
+                    NavigationLink(
+                        "Offline counter demo",
+                        destination: CounterView(
+                            store: self.store
+                                .view(
+                                    value: { $0.counterView },
+                                    action: { .offlineCounterView($0) }
+                                )
+                        )
+                    )
+                }
                 NavigationLink(
                     "Favorite primes",
                     destination: FavoritePrimesView(
                         store: self.store.view(
-                            value: { $0.favoritePrimes },
+                            value: { $0.favoritePrimesState },
                             action: { .favoritePrimes($0) }
                         )
                     )
