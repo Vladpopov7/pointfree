@@ -128,7 +128,7 @@ public final class Store<Value, Action>: ObservableObject {
     // private(set) чтобы нельзя было менять это значение кроме как через метод  send(_ action: Action)
     @Published public private(set) var value: Value
     private var viewCancellable: Cancellable?
-    private var effectCancellables: Set<AnyCancellable> = []
+    private var effectCancellables: [UUID: AnyCancellable] = [:]
     
     // we actually cares about Environment in the initialization, that's why we use any in the Store, and Environement in the init
     public init<Environment>(
@@ -146,22 +146,18 @@ public final class Store<Value, Action>: ObservableObject {
     public func send(_ action: Action) {
         let effects = self.reducer(&self.value, action, self.environment)
         effects.forEach { effect in
-            // Inside this receiveCompletion we could try to remove the cancellable from the array, but we don’t actually have access to it here. We have a bit of a chicken-and-egg problem, where the cancellable is created by calling sink but we need access to the cancellable from inside one of the closures that defines the sink.
-            // To work around this we need to extract out the cancellable into an implicitly unwrapped optional, which allows us to get a variable for a type before it holds a value, and then later we get to assign the variable.
-            var effectCancellable: AnyCancellable?
             var didComplete = false
-            effectCancellable = effect.sink(
+            let uuid = UUID()
+            let effectCancellable = effect.sink(
                 receiveCompletion: { [weak self] _ in
                     didComplete = true
                     // мы можем попасть сюда до того как effectCancellable присвоется возврат sink похоже, поэтому нельзя использовать force unwrap
-                    guard let effectCancellable else { return }
-                    self?.effectCancellables.remove(effectCancellable)
+                    self?.effectCancellables[uuid] = nil
                 },
-                receiveValue: self.send
+                receiveValue: { [weak self] in self?.send($0) }
             )
-            // insert the effectCancellable into the set if the publisher did not complete immediately
-            if !didComplete, let effectCancellable {
-                self.effectCancellables.insert(effectCancellable)
+            if !didComplete {
+                self.effectCancellables[uuid] = effectCancellable
             }
         }
     }
@@ -181,9 +177,12 @@ public final class Store<Value, Action>: ObservableObject {
             environment: self.environment
         )
         // обновляем данные в localStore, когда делаем send в globalStore
-        localStore.viewCancellable = self.$value.sink { [weak localStore] newValue in
-            localStore?.value = toLocalValue(newValue)
-        }
+        localStore.viewCancellable = self.$value
+            .map(toLocalValue)
+//            .removeDuplicates()
+            .sink { [weak localStore] newValue in
+                localStore?.value = newValue
+            }
         return localStore
     }
 }
