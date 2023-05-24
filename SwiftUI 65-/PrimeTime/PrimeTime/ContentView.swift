@@ -80,8 +80,8 @@ struct AppState: Equatable {
 enum AppAction: Equatable {
 //    case counter(CounterAction)
 //    case primeModal(PrimeModalAction)
-    case counterView(CounterViewAction)
-    case offlineCounterView(CounterViewAction)
+    case counterView(CounterFeatureAction)
+    case offlineCounterView(CounterFeatureAction)
     case favoritePrimes(FavoritePrimesAction)
     
     // это как keyPath, только для Actions (так как это enum)
@@ -96,7 +96,7 @@ enum AppAction: Equatable {
 //        }
 //    }
 //    
-//    var counterView: CounterViewAction? {
+//    var counterView: CounterFeatureAction? {
 //        get {
 //            guard case let .counterView(value) = self else { return nil }
 //            return value
@@ -194,9 +194,9 @@ func activityFeed(
 }
 
 extension AppState {
-    var counterView: CounterViewState {
+    var counterView: CounterFeatureState {
         get {
-            CounterViewState(
+            CounterFeatureState(
                 alertNthPrime: self.alertNthPrime,
                 count: self.count,
                 favoritePrimes: self.favoritePrimes,
@@ -219,7 +219,8 @@ var state = AppState()
 let isInExperiment = Bool.random()
 
 struct ContentView: View {
-    @ObservedObject var store: Store<AppState, AppAction>
+    let store: Store<AppState, AppAction>
+//    @ObservedObject var viewStore: ViewStore<???>
     
     init(store: Store<AppState, AppAction>) {
         print("ContentView.init")
@@ -235,7 +236,7 @@ struct ContentView: View {
                         "Counter demo",
                         destination: CounterView(
                             store: self.store
-                                .view(
+                                .scope(
                                     value: { $0.counterView },
                                     action: { .counterView($0) }
                                 )
@@ -246,7 +247,7 @@ struct ContentView: View {
                         "Offline counter demo",
                         destination: CounterView(
                             store: self.store
-                                .view(
+                                .scope(
                                     value: { $0.counterView },
                                     action: { .offlineCounterView($0) }
                                 )
@@ -256,7 +257,7 @@ struct ContentView: View {
                 NavigationLink(
                     "Favorite primes",
                     destination: FavoritePrimesView(
-                        store: self.store.view(
+                        store: self.store.scope(
                             value: { $0.favoritePrimesState },
                             action: { .favoritePrimes($0) }
                         )

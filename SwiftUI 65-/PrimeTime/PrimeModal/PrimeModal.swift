@@ -25,19 +25,28 @@ public func primeModalReducer(
 }
 
 public struct IsPrimeModalView: View {
-    @ObservedObject var store: Store<PrimeModalState, PrimeModalAction>
+    struct State: Equatable {
+        let count: Int
+        let isFavorite: Bool
+    }
+    let store: Store<PrimeModalState, PrimeModalAction>
+    @ObservedObject var viewStore: ViewStore<State>
     
     public init(store: Store<PrimeModalState, PrimeModalAction>) {
         print("IsPrimeModalView.init")
         self.store = store
+        // IsPrimeModalView will be recomputed only when its local state changes, because viewStore will remove dupolicates (and other screens have the same behaviour)
+        self.viewStore = self.store
+            .scope(value: State.init(primeModalState:), action: { $0 })
+            .view
     }
     
     public var body: some View {
         print("IsPrimeModalView.body")
         return VStack {
-            if isPrime(self.store.value.count) {
-                Text("\(self.store.value.count) is prime 🎉")
-                if self.store.value.favoritePrimes.contains(self.store.value.count) {
+            if isPrime(self.viewStore.value.count) {
+                Text("\(self.viewStore.value.count) is prime 🎉")
+                if self.viewStore.value.isFavorite {
                     Button("Remove from favorite primes") {
                         store.send(.removeFavoritePrimeTapped)
                     }
@@ -47,7 +56,7 @@ public struct IsPrimeModalView: View {
                     }
                 }
             } else {
-                Text("\(self.store.value.count) is not prime :(")
+                Text("\(self.viewStore.value.count) is not prime :(")
             }
         }
     }
@@ -60,4 +69,11 @@ public func isPrime (_ p: Int) -> Bool {
         if p % i == 0 { return false }
     }
     return true
+}
+
+extension IsPrimeModalView.State {
+    init(primeModalState state: PrimeModalState) {
+        self.count = state.count
+        self.isFavorite = state.favoritePrimes.contains(state.count)
+    }
 }

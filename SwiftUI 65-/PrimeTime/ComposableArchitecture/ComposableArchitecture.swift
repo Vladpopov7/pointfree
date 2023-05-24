@@ -121,12 +121,46 @@ public func logging<Value, Action, Environment>(
     }
 }
 
+public final class ViewStore<Value>: ObservableObject {
+    @Published public fileprivate(set) var value: Value
+    fileprivate var cancellable: Cancellable?
+    
+    public init(initialValue value: Value) {
+        self.value = value
+    }
+}
+
+extension Store where Value: Equatable {
+    public var view: ViewStore<Value> {
+        self.view(removeDuplicates: ==)
+    }
+}
+
+extension Store {
+    public func view(
+        removeDuplicates predicate: @escaping (Value, Value) -> Bool
+    ) -> ViewStore<Value> {
+        let viewStore = ViewStore(initialValue: self.value)
+        
+        // subscribe to store changes and replay those changes to ViewStore
+        viewStore.cancellable = self.$value
+            .removeDuplicates(by: predicate)
+            .sink(receiveValue: { [weak viewStore] value in
+                viewStore?.value = value
+                // literally referencing self inside of this sink closure
+                self
+            })
+        
+        return viewStore
+    }
+}
+
 // the store as an entire concept has very little to do with the environment. Users of a Store only care about getting state values out of it and sending actions to it. They never access the environment or even need to know about the environment that is being used under the hood. That's why we use Any and only in the init we use Environment
-public final class Store<Value, Action>: ObservableObject {
+public final class Store<Value, Action> /*: ObservableObject*/ {
     private let reducer: Reducer<Value, Action, Any>
     private let environment: Any
     // private(set) чтобы нельзя было менять это значение кроме как через метод  send(_ action: Action)
-    @Published public private(set) var value: Value
+    @Published private var value: Value
     private var viewCancellable: Cancellable?
     private var effectCancellables: [UUID: AnyCancellable] = [:]
     
@@ -162,8 +196,8 @@ public final class Store<Value, Action>: ObservableObject {
         }
     }
     
-    // посмотреть локальное состояние
-    public func view<LocalValue, LocalAction>(
+    // scope the local store
+    public func scope<LocalValue, LocalAction>(
         value toLocalValue: @escaping (Value) -> LocalValue,
         action toGlobalAction: @escaping (LocalAction) -> Action
     ) -> Store<LocalValue, LocalAction> {

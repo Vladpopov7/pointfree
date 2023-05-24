@@ -33,7 +33,7 @@ class CounterTests: XCTestCase {
 //    }
     
 //    func testSnapshots() {
-//        let store = Store(initialValue: CounterViewState(), reducer: counterViewReducer, environment: { _ in .sync { 17 } })
+//        let store = Store(initialValue: CounterFeatureState(), reducer: counterViewReducer, environment: { _ in .sync { 17 } })
 //        let view = CounterView(store: store)
 //
 //        let vc = UIHostingController(rootView: view)
@@ -80,7 +80,7 @@ class CounterTests: XCTestCase {
     
     func testIncrDecrButtonTapped() {
         assert(
-            initialValue: CounterViewState(count: 2),
+            initialValue: CounterFeatureState(count: 2),
             reducer: counterViewReducer,
             environment: { _ in .sync { 17 }},
             steps:
@@ -91,7 +91,7 @@ class CounterTests: XCTestCase {
         )
         
         // замена кода более коротко (выше)
-//        var state = CounterViewState(count: 2)
+//        var state = CounterFeatureState(count: 2)
 //        var expected = state
 //        let effects = counterViewReducer(&state, .counter(.incrTapped))
 //
@@ -104,7 +104,7 @@ class CounterTests: XCTestCase {
 //        Current.nthPrime =
         
         assert(
-            initialValue: CounterViewState(
+            initialValue: CounterFeatureState(
                 alertNthPrime: nil,
                 count: 7,
                 isNthPrimeButtonDisabled: false
@@ -124,7 +124,7 @@ class CounterTests: XCTestCase {
             }
         )
         // код выше - это краткая запись закомментированного кода
-//        var state = CounterViewState (
+//        var state = CounterFeatureState (
 //            alertNthPrime: nil,
 //            isNthPrimeButtonDisabled: false
 //        )
@@ -135,7 +135,7 @@ class CounterTests: XCTestCase {
 //        XCTAssertEqual(state, expected)
 //        XCTAssertEqual(effects.count, 1)
 //
-//        var nextAction: CounterViewAction!
+//        var nextAction: CounterFeatureAction!
 //        let receivedCompletion = self.expectation(description: "receivedCompletion")
 //        let cancellable = effects[0].sink(
 //            receiveCompletion: { _ in
@@ -166,7 +166,7 @@ class CounterTests: XCTestCase {
 //        Current.nthPrime =
         
         assert(
-            initialValue: CounterViewState(
+            initialValue: CounterFeatureState(
                 alertNthPrime: nil,
                 count: 7,
                 isNthPrimeButtonDisabled: false
@@ -187,7 +187,7 @@ class CounterTests: XCTestCase {
 //        Current = .mock
         
         assert(
-            initialValue: CounterViewState(
+            initialValue: CounterFeatureState(
                 count: 2,
                 favoritePrimes: [3, 5]
             ),
