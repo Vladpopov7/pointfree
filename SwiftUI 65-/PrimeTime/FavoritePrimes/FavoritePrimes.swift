@@ -203,7 +203,7 @@ extension FileClient {
 
 public struct FavoritePrimesView: View {
     let store: Store<FavoritePrimesState, FavoritePrimesAction>
-    @ObservedObject var viewStore: ViewStore<FavoritePrimesState>
+    @ObservedObject var viewStore: ViewStore<FavoritePrimesState, FavoritePrimesAction>
     
     public init(store: Store<FavoritePrimesState, FavoritePrimesAction>) {
         print("FavoritePrimesView.init")
@@ -216,18 +216,18 @@ public struct FavoritePrimesView: View {
         return List {
             ForEach(self.viewStore.value.favoritePrimes, id: \.self) { prime in
                 Button("\(prime)") {
-                    self.store.send(.primeButtonTapped(prime))
+                    self.viewStore.send(.primeButtonTapped(prime))
                 }
             }
             .onDelete { indexSet in
-                self.store.send(.deleteFavoritePrimes(indexSet))
+                self.viewStore.send(.deleteFavoritePrimes(indexSet))
             }
         }
         .navigationBarTitle(Text("Favorite Primes"))
         .navigationBarItems(
             trailing: HStack {
                 Button("Save") {
-                    self.store.send(.saveButtonTapped)
+                    self.viewStore.send(.saveButtonTapped)
 //                    let data = try! JSONEncoder().encode(self.store.value)
 //                    let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
 //                    let documentUrl = URL(fileURLWithPath: documentsPath)
@@ -235,7 +235,7 @@ public struct FavoritePrimesView: View {
 //                    try! data.write(to: favoritePrimesUrl)
                 }
                 Button("Load") {
-                    self.store.send(.loadButtonTapped)
+                    self.viewStore.send(.loadButtonTapped)
                     // вызывать весь код загрузки из памяти здесь и затем отправлять новое действие .loadedFAvoritePrimes это side effect, поэтому это перенесено в loadButtonTapped и уже там внутри вернется и вызовется действие loadedFavoritePrimes и это называется unidirectional data flow - Data is only ever mutated in one single way: an action comes into the reducer which allows the reducer to mutate the state. If you want to mutate the state via some side effect work, you have no choice but to construct a new action that can then be fed back into the reducer, which only then gives you the ability to mutate.
                     
 //                    let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
@@ -251,7 +251,7 @@ public struct FavoritePrimesView: View {
         )
         .alert(item: .constant(self.viewStore.value.alertNthPrime)) { primeAlert in
             Alert(title: Text(primeAlert.title), dismissButton: Alert.Button.default(Text("Ok"), action: {
-                self.store.send(.alertDismissButtonTapped)
+                self.viewStore.send(.alertDismissButtonTapped)
             }))
         }
     }

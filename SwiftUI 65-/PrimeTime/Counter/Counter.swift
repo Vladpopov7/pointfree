@@ -7,11 +7,14 @@ import SwiftUI
 public enum CounterAction: Equatable {
     case decrTapped
     case incrTapped
-    case nthPrimeButtonTapped
+//    case nthPrimeButtonTapped
+    // one action that can be called by different ways
+    case requestNthPrime
     case nthPrimeResponse(n: Int, prime: Int?)
     case alertDismissButtonTapped
     case isPrimeButtonTapped
     case primeModalDismissed
+//    case doubleTap
 }
 
 public typealias CounterState = (
@@ -45,7 +48,7 @@ public func counterReducer(
         state.count += 1
         return []
         
-    case .nthPrimeButtonTapped:
+    case .requestNthPrime:
         state.isNthPrimeRequestInFlight = true
         let n = state.count
         return [
@@ -95,6 +98,16 @@ public func counterReducer(
     case .primeModalDismissed:
         state.isPrimeModalShown = false
         return []
+        
+//    case .doubleTap:
+//        state.isNthPrimeRequestInFlight = true
+//        let n = state.count
+//        return [
+//            environment(state.count)
+//                .map { CounterAction.nthPrimeResponse(n: n, prime: $0) }
+//                .receive(on: DispatchQueue.main)
+//                .eraseToEffect()
+//        ]
     }
 }
 
@@ -136,12 +149,9 @@ public struct CounterFeatureState: Equatable {
     public var alertNthPrime: PrimeAlert?
     public var count: Int
     public var favoritePrimes: [Int]
-//    public var isNthPrimeButtonDisabled: Bool
     public var isNthPrimeRequestInFlight: Bool
     public var isPrimeModalShown: Bool
     
-//    public var isLoadingIndicatorHidden: Bool
-
     public init(
         alertNthPrime: PrimeAlert? = nil,
         count: Int = 0,
@@ -202,6 +212,17 @@ public struct CounterView: View {
         let isPrimeModalShown: Bool
         let isIncrementButtonDisabled: Bool
         let isDecrementButtonDisabled: Bool
+        let nthPrimeButtonTitle: String
+    }
+    // Actions related to view
+    public enum Action {
+        case decrTapped
+        case incrTapped
+        case nthPrimeButtonTapped
+        case alertDismissButtonTapped
+        case isPrimeButtonTapped
+        case primeModalDismissed
+        case doubleTap
     }
     // @State is for local state, если мы уйдем с экрана и вернемся, то count сбросится на 0
 //    @State var count: Int = 0
@@ -209,7 +230,7 @@ public struct CounterView: View {
 
     // чтобы сохранялось состояние надо использовать @ObjectBinding(deprecated, теперь @ObservedObject) нашего собственноого типа AppState, который конформит protocol BindableObject(deprecated)
     let store: Store<CounterFeatureState, CounterFeatureAction>
-    @ObservedObject var viewStore: ViewStore<State>
+    @ObservedObject var viewStore: ViewStore<State, Action>
 //    @State var isPrimeModalShown: Bool = false
 //    @State var alertNthPrime: PrimeAlert?
 //    @State var isNthPrimeButtonDisabled = false
@@ -218,7 +239,10 @@ public struct CounterView: View {
         print("CounterView.init")
         self.store = store
         self.viewStore = self.store
-            .scope(value: State.init(counterFeatureState:), action: { $0 })
+            .scope(
+                value: State.init,
+                action: CounterFeatureAction.init
+            )
             .view
     }
     
@@ -226,14 +250,16 @@ public struct CounterView: View {
         print("CounterView.body")
         return VStack {
             HStack {
-                Button("-") { self.store.send(.counter(.decrTapped)) }
+                Button("-") { self.viewStore.send(.decrTapped) }
                     .disabled(self.viewStore.value.isDecrementButtonDisabled)
                 Text("\(self.viewStore.value.count)")
-                Button("+") { self.store.send(.counter(.incrTapped)) }
+                Button("+") { self.viewStore.send(.incrTapped) }
                     .disabled(self.viewStore.value.isIncrementButtonDisabled)
             }
-            Button("Is this prime?") { self.store.send(.counter(.isPrimeButtonTapped)) }
-            Button("What is the \(ordinal(self.viewStore.value.count)) prime?", action: self.nthPrimeButtonAction)
+            Button("Is this prime?") { self.viewStore.send(.isPrimeButtonTapped) }
+            Button(self.viewStore.value.nthPrimeButtonTitle) {
+                self.viewStore.send(.nthPrimeButtonTapped)
+            }
                 .disabled(self.viewStore.value.isNthPrimeButtonDisabled)
         }
         .font(.title)
@@ -252,7 +278,7 @@ public struct CounterView: View {
 //        .sheet(isPresented: self.$isPrimeModalShown) {
         .sheet(
             isPresented: .constant(self.viewStore.value.isPrimeModalShown),
-            onDismiss: { self.store.send(.counter(.primeModalDismissed)) }
+            onDismiss: { self.viewStore.send(.primeModalDismissed) }
         ) {
             IsPrimeModalView(
                 store: self.store
@@ -273,21 +299,16 @@ public struct CounterView: View {
             Alert(
                 title: Text(alert.title),
                 dismissButton: Alert.Button.default(Text("Ok")) {
-                    self.store.send(.counter(.alertDismissButtonTapped))
+                    self.viewStore.send(.alertDismissButtonTapped)
                 }
             )
         }
-    }
-    
-    func nthPrimeButtonAction() {
-//        self.isNthPrimeButtonDisabled = true
-//        nthPrime(self.viewStore.value.count) { prime in
-//            if let prime = prime {
-//                self.alertNthPrime = PrimeAlert(prime: prime)
-//            }
-//            self.isNthPrimeButtonDisabled = false
-//        }
-        self.store.send(.counter(.nthPrimeButtonTapped))
+        // to make tap gesture working in the white areay
+        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+        .background(Color.white)
+        .onTapGesture(count: 2) {
+            self.viewStore.send(.doubleTap)
+        }
     }
 }
 
@@ -299,5 +320,27 @@ extension CounterView.State {
         self.isPrimeModalShown = counterFeatureState.isPrimeModalShown
         self.isIncrementButtonDisabled = counterFeatureState.isNthPrimeRequestInFlight
         self.isDecrementButtonDisabled = counterFeatureState.isNthPrimeRequestInFlight
+        self.nthPrimeButtonTitle = "What is the \(ordinal(counterFeatureState.count)) prime?"
+    }
+}
+
+extension CounterFeatureAction {
+    init(action: CounterView.Action) {
+        switch action {
+        case .decrTapped:
+            self = .counter(.decrTapped)
+        case .incrTapped:
+            self = .counter(.incrTapped)
+        case .nthPrimeButtonTapped:
+            self = .counter(.requestNthPrime)
+        case .alertDismissButtonTapped:
+            self = .counter(.alertDismissButtonTapped)
+        case .isPrimeButtonTapped:
+            self = .counter(.isPrimeButtonTapped)
+        case .primeModalDismissed:
+            self = .counter(.primeModalDismissed)
+        case .doubleTap:
+            self = .counter(.requestNthPrime)
+        }
     }
 }

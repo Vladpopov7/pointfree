@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		12116F152A24F516002D8431 /* ComposableArchitectureSnapshotTesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12116F142A24F516002D8431 /* ComposableArchitectureSnapshotTesting.swift */; };
 		122122D329C21F6D005B492D /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 122122D229C21F6D005B492D /* SnapshotTesting */; };
 		122122DA29C3B047005B492D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122122D929C3B047005B492D /* AppDelegate.swift */; };
 		122122DC29C3B07B005B492D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122122DB29C3B07B005B492D /* SceneDelegate.swift */; };
@@ -236,6 +237,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		12116F142A24F516002D8431 /* ComposableArchitectureSnapshotTesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposableArchitectureSnapshotTesting.swift; sourceTree = "<group>"; };
 		122122D929C3B047005B492D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		122122DB29C3B07B005B492D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		122122DE29C3B105005B492D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -508,6 +510,7 @@
 			children = (
 				12653EF729AD072600CD77F8 /* CounterTests.swift */,
 				122122E029C3B43D005B492D /* Info.plist */,
+				12116F142A24F516002D8431 /* ComposableArchitectureSnapshotTesting.swift */,
 			);
 			path = CounterTests;
 			sourceTree = "<group>";
@@ -1123,6 +1126,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				12116F152A24F516002D8431 /* ComposableArchitectureSnapshotTesting.swift in Sources */,
 				12653EF829AD072600CD77F8 /* CounterTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

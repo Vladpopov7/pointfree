@@ -2,60 +2,53 @@ import XCTest
 @testable import FavoritePrimes
 
 final class FavoritePrimesTests: XCTestCase {
-//    var environment:
-    override func setUp() {
-        super.setUp()
-        
-//        Current = .mock
-        
-        // we can setup a common environment
-//        self.environment = (
-//        )
-    }
-    
     func testDeleteFavoritePrimes() {
-        var state = [2, 3, 5, 7]
-        let effects = favoritePrimesReducer(state: &state, action: .deleteFavoritePrimes([2]), environment: .mock)
+        let environment = FavoritePrimesEnvironment(fileClient: .mock, nthPrime: { _ in .sync { 17 } })
+        var state = FavoritePrimesState(alertNthPrime: nil, favoritePrimes: [2, 3, 5, 7])
+        let effects = favoritePrimesReducer(state: &state, action: .deleteFavoritePrimes([2]), environment: environment)
         
-        XCTAssertEqual (state, [2, 3, 7])
+        XCTAssertNil(state.alertNthPrime)
+        XCTAssertEqual(state.favoritePrimes, [2, 3, 7])
         XCTAssert(effects.isEmpty)
     }
     
     func testSaveButtonTapped() {
         var didSave = false
-        var environment = FileClient.mock
-        environment.save = { _, _ in
+        var fileClient = FileClient.mock
+        fileClient.save = { _, data in
                 .fireAndForget {
                     didSave = true
                 }
         }
         
-        var state = [2, 3, 5, 7]
+        let environment = FavoritePrimesEnvironment(fileClient: fileClient, nthPrime: { _ in .sync { 17 } })
+        var state = FavoritePrimesState(alertNthPrime: nil, favoritePrimes: [2, 3, 5, 7])
         let effects = favoritePrimesReducer(state: &state, action: .saveButtonTapped, environment: environment)
         
-        XCTAssertEqual (state, [2, 3, 5, 7])
+        XCTAssertNil(state.alertNthPrime)
+        XCTAssertEqual(state.favoritePrimes, [2, 3, 5, 7])
         XCTAssertEqual(effects.count, 1)
         
-        // test that the effect that was returned to us by a reducer is calling the correct effect in the environment
-        effects[0].sink { _ in
-            // we know that this effect should never be producing anything
-            XCTFail()
-        }
+        _ = effects[0].sink { _ in XCTFail() }
+        
         XCTAssert(didSave)
     }
     
     func testLoadFavoritePrimesFlow() {
-        var environment = FileClient.mock
-        environment.load = { _ in .sync { try! JSONEncoder().encode([2, 31]) } }
-        var state = [2, 3, 5, 7]
+        var fileClient = FileClient.mock
+        fileClient.load = { _ in .sync { try! JSONEncoder().encode([2, 31]) } }
+        
+        let environment = FavoritePrimesEnvironment(fileClient: fileClient, nthPrime: { _ in .sync { 17 } })
+        var state = FavoritePrimesState(alertNthPrime: nil, favoritePrimes: [2, 3, 5, 7])
         var effects = favoritePrimesReducer(state: &state, action: .loadButtonTapped, environment: environment)
         
-        XCTAssertEqual (state, [2, 3, 5, 7])
+        XCTAssertNil(state.alertNthPrime)
+        XCTAssertEqual(state.favoritePrimes, [2, 3, 5, 7])
         XCTAssertEqual(effects.count, 1)
         
         var nextAction: FavoritePrimesAction!
         let receivedCompletion = self.expectation(description: "receivedCompletion")
-        effects[0].sink(
+        _ = effects[0].sink(
             receiveCompletion: { _ in
                 receivedCompletion.fulfill()
             },
@@ -63,12 +56,12 @@ final class FavoritePrimesTests: XCTestCase {
                 XCTAssertEqual(action, .loadedFavoritePrimes([2, 31]))
                 nextAction = action
             })
-        // timeout is 0 because we are expecting receivedCompletion synchronously
         self.wait(for: [receivedCompletion], timeout: 0)
         
         effects = favoritePrimesReducer(state: &state, action: nextAction, environment: environment)
         
-        XCTAssertEqual (state, [2, 31])
-        XCTAssert(effects .isEmpty)
+        XCTAssertNil(state.alertNthPrime)
+        XCTAssertEqual(state.favoritePrimes, [2, 31])
+        XCTAssert(effects.isEmpty)
     }
 }

@@ -30,7 +30,7 @@ public struct IsPrimeModalView: View {
         let isFavorite: Bool
     }
     let store: Store<PrimeModalState, PrimeModalAction>
-    @ObservedObject var viewStore: ViewStore<State>
+    @ObservedObject var viewStore: ViewStore<State, PrimeModalAction>
     
     public init(store: Store<PrimeModalState, PrimeModalAction>) {
         print("IsPrimeModalView.init")
@@ -48,11 +48,11 @@ public struct IsPrimeModalView: View {
                 Text("\(self.viewStore.value.count) is prime 🎉")
                 if self.viewStore.value.isFavorite {
                     Button("Remove from favorite primes") {
-                        store.send(.removeFavoritePrimeTapped)
+                        self.viewStore.send(.removeFavoritePrimeTapped)
                     }
                 } else {
                     Button("Save to favorite primes") {
-                        store.send(.saveFavoritePrimeTapped)
+                        self.viewStore.send(.saveFavoritePrimeTapped)
                     }
                 }
             } else {
