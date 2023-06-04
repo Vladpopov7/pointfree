@@ -84,59 +84,54 @@ typealias AppEnvironment = (
 )
 
 // reducer takes a current piece of state and combines it with an action in order to get the new updated state.
-let appReducer: Reducer<AppState, AppAction, AppEnvironment> = combine(
-    pullback(
-        counterViewReducer,
+let appReducer: Reducer<AppState, AppAction, AppEnvironment> = .combine(
+    counterFeatureReducer.pullback(
         value: \AppState.counterView,
         action: /AppAction.counterView,
         environment: { $0.nthPrime }
     ),
-    pullback(
-        counterViewReducer,
+    counterFeatureReducer.pullback(
         value: \AppState.counterView,
         action: /AppAction.offlineCounterView,
         environment: { $0.offlineNthPrime }
     ),
-    pullback(
-        favoritePrimesReducer,
+    favoritePrimesReducer.pullback(
         value: \.favoritePrimesState,
         action: /AppAction.favoritePrimes,
         environment: { ($0.fileClient, $0.nthPrime) }
     )
 )
 
-// higher order function "activityFeed"
-func activityFeed(
-    _ reducer: @escaping Reducer<AppState, AppAction, AppEnvironment>
-) -> Reducer<AppState, AppAction, AppEnvironment> {
-    
-    return { state, action, environment in
-        switch action {
-        case .counterView(.counter),
-                .offlineCounterView(.counter),
-                .favoritePrimes(.loadedFavoritePrimes),
-                .favoritePrimes(.loadButtonTapped),
-                .favoritePrimes(.saveButtonTapped),
-                .favoritePrimes(.primeButtonTapped),
-                .favoritePrimes(.nthPrimeResponse),
-                .favoritePrimes(.alertDismissButtonTapped):
-            break
-            
-        case .counterView(.primeModal(.removeFavoritePrimeTapped)),
-                .offlineCounterView(.primeModal(.removeFavoritePrimeTapped)):
-            state.activityFeed.append(.init(timestamp: Date(), type: .removedFavoritePrime(state.count)))
-            
-        case .counterView(.primeModal(.saveFavoritePrimeTapped)),
-                .offlineCounterView(.primeModal(.saveFavoritePrimeTapped)):
-            state.activityFeed.append(.init(timestamp: Date(), type: .addedFavoritePrime(state.count)))
-            
-        case let .favoritePrimes(.deleteFavoritePrimes(indexSet)):
-            for index in indexSet {
-                state.activityFeed.append(.init(timestamp: Date(), type: .removedFavoritePrime(state.favoritePrimes[index])))
+extension Reducer where Value == AppState, Action == AppAction, Environment == AppEnvironment {
+    func activityFeed() -> Reducer {
+        return .init { state, action, environment in
+            switch action {
+            case .counterView(.counter),
+                    .offlineCounterView(.counter),
+                    .favoritePrimes(.loadedFavoritePrimes),
+                    .favoritePrimes(.loadButtonTapped),
+                    .favoritePrimes(.saveButtonTapped),
+                    .favoritePrimes(.primeButtonTapped),
+                    .favoritePrimes(.nthPrimeResponse),
+                    .favoritePrimes(.alertDismissButtonTapped):
+                break
+                
+            case .counterView(.primeModal(.removeFavoritePrimeTapped)),
+                    .offlineCounterView(.primeModal(.removeFavoritePrimeTapped)):
+                state.activityFeed.append(.init(timestamp: Date(), type: .removedFavoritePrime(state.count)))
+                
+            case .counterView(.primeModal(.saveFavoritePrimeTapped)),
+                    .offlineCounterView(.primeModal(.saveFavoritePrimeTapped)):
+                state.activityFeed.append(.init(timestamp: Date(), type: .addedFavoritePrime(state.count)))
+                
+            case let .favoritePrimes(.deleteFavoritePrimes(indexSet)):
+                for index in indexSet {
+                    state.activityFeed.append(.init(timestamp: Date(), type: .removedFavoritePrime(state.favoritePrimes[index])))
+                }
             }
-        }
 
-        return reducer(&state, action, environment)
+            return self(&state, action, environment)
+        }
     }
 }
 

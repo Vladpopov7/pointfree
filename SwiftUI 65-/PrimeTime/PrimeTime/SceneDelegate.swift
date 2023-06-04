@@ -16,13 +16,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                         //            initialValue: AppState(count: 40_000),
                         initialValue: AppState(),
                         // we've added activityFeed tracking functionality instead of just passing in an appReducer, and also logging. We use the with and compose functions from the library and in the future we can simply add functions as parameters to the compose function in order (aspect oriented programming)
-                        reducer: with(
-                            appReducer,
-                            compose(
-                                logging,
-                                activityFeed
-                            )
-                        ),
+                        reducer: appReducer
+                            .activityFeed(),
+                        // we can put logging here for the whole app level, or in some module (in the Counter module for example)
+//                            .logging(),
                         environment: AppEnvironment(
                             fileClient: .live,
                             nthPrime: Counter.nthPrime,

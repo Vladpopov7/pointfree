@@ -23,12 +23,10 @@ public enum CounterAction: Equatable {
     case primeDetailDismissed
 }
 
+public typealias CounterEnvironment = (Int) -> Effect<Int?>
+
 // reducer takes a current piece of state and combines it with an action in order to get the new updated state.
-public func counterReducer(
-    state: inout CounterState,
-    action: CounterAction,
-    environment: CounterEnvironment
-) -> [Effect<CounterAction>] {
+public let counterReducer = Reducer<CounterState, CounterAction, CounterEnvironment> { state, action, environment in
     switch action {
     case .decrTapped:
         state.count -= 1
@@ -66,20 +64,20 @@ public func counterReducer(
         return []
     }
 }
-
-public typealias CounterEnvironment = (Int) -> Effect<Int?>
+// we can put logging in this module to make it focused for this Counter module, or we can put it on the app level (in the scene method)
+    .logging()
 
 // combination of two pullbacks for a screen that can show a modal screen
-public let counterViewReducer: Reducer<CounterFeatureState, CounterFeatureAction, CounterEnvironment> = combine(
-    pullback(
-        counterReducer,
+public let counterFeatureReducer = Reducer.combine(
+    counterReducer.pullback(
         value: \CounterFeatureState.counter,
+        // Custom key path for enum
         action: /CounterFeatureAction.counter,
         environment: { $0 }
     ),
-    pullback(
-        primeModalReducer,
+    primeModalReducer.pullback(
         value: \.primeModal,
+        // Custom key path for enum
         action: /CounterFeatureAction.primeModal,
         // Void environment
         environment: { _ in () }

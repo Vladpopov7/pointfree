@@ -25,11 +25,7 @@ public typealias FavoritePrimesEnvironment = (
     nthPrime: (Int) -> Effect<Int?>
 )
 
-public func favoritePrimesReducer(
-    state: inout FavoritePrimesState,
-    action: FavoritePrimesAction,
-    environment: FavoritePrimesEnvironment
-) -> [Effect<FavoritePrimesAction>] {
+public let favoritePrimesReducer = Reducer<FavoritePrimesState, FavoritePrimesAction, FavoritePrimesEnvironment> { state, action, environment in
     switch action {
     case let .deleteFavoritePrimes(indexSet):
         for index in indexSet {
