@@ -23,11 +23,10 @@ import XCTest
 //        app.buttons["What is the 2nd prime?"].tap()
 //        let alert = app.alerts["The 2nd prime is 3"]
 //        XCTAssert(alert.waitForExistence(timeout: 5))
-//        // тут фейлилось потому что для показа alert нужно время, поэтому создали let alert и wait for 5 seconds
+//        // it takes time to show the alert, so we created let alert and wait for 5 seconds
 //        alert.scrollViews.otherElements.buttons["Ok"].tap()
 //        app.buttons["Is this prime?"].tap()
 //        app.buttons["Save to favorite primes"].tap()
 //        app.children(matching: .window).element(boundBy: 0).children(matching: .other).element.children(matching: .other).element(boundBy: 0).swipeDown()
-//                        
 //    }
 //}

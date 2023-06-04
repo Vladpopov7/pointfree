@@ -51,6 +51,12 @@
 		12653F6E29AD208B00CD77F8 /* FavoritePrimes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12653F6D29AD208B00CD77F8 /* FavoritePrimes.swift */; };
 		12653F7029AD21F200CD77F8 /* Counter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12653F6F29AD21F200CD77F8 /* Counter.swift */; };
 		12653F7229AD22D600CD77F8 /* PrimeModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12653F7129AD22D600CD77F8 /* PrimeModal.swift */; };
+		12B835932A28B54300BC195E /* Base.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 12B835912A28B53700BC195E /* Base.xcconfig */; };
+		12B835942A28B54500BC195E /* Framework.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 12B835902A28B53700BC195E /* Framework.xcconfig */; };
+		12B835952A28B54800BC195E /* Test.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 12B835922A28B53700BC195E /* Test.xcconfig */; };
+		12B835B12A2C86FD00BC195E /* CounterView_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12B835B02A2C86FD00BC195E /* CounterView_iOS.swift */; };
+		12B835B32A2C878D00BC195E /* CounterView_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12B835B22A2C878D00BC195E /* CounterView_macOS.swift */; };
+		12B835B52A2CDEBF00BC195E /* FileClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12B835B42A2CDEBF00BC195E /* FileClient.swift */; };
 		12C9D2B629F96D8100489BA2 /* CasePaths in Frameworks */ = {isa = PBXBuildFile; productRef = 12C9D2B529F96D8100489BA2 /* CasePaths */; };
 		12F4316929B3B8AC00D24F1C /* Effects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F4316829B3B8AC00D24F1C /* Effects.swift */; };
 /* End PBXBuildFile section */
@@ -286,6 +292,12 @@
 		12653F6D29AD208B00CD77F8 /* FavoritePrimes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritePrimes.swift; sourceTree = "<group>"; };
 		12653F6F29AD21F200CD77F8 /* Counter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Counter.swift; sourceTree = "<group>"; };
 		12653F7129AD22D600CD77F8 /* PrimeModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimeModal.swift; sourceTree = "<group>"; };
+		12B835902A28B53700BC195E /* Framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Framework.xcconfig; sourceTree = "<group>"; };
+		12B835912A28B53700BC195E /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		12B835922A28B53700BC195E /* Test.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Test.xcconfig; sourceTree = "<group>"; };
+		12B835B02A2C86FD00BC195E /* CounterView_iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterView_iOS.swift; sourceTree = "<group>"; };
+		12B835B22A2C878D00BC195E /* CounterView_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterView_macOS.swift; sourceTree = "<group>"; };
+		12B835B42A2CDEBF00BC195E /* FileClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileClient.swift; sourceTree = "<group>"; };
 		12F4316829B3B8AC00D24F1C /* Effects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Effects.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -421,16 +433,17 @@
 				12653EB529AD03A900CD77F8 /* PrimeTime */,
 				12653EC629AD03AE00CD77F8 /* PrimeTimeTests */,
 				12653ED029AD03AE00CD77F8 /* PrimeTimeUITests */,
+				12653F4F29AD07E800CD77F8 /* ComposableArchitecture */,
+				12653F5D29AD07E900CD77F8 /* ComposableArchitectureTests */,
+				124013ED2A0BE172006CD60C /* ComposableArchitectureTestSupport */,
 				12653EE829AD072500CD77F8 /* Counter */,
 				12653EF629AD072600CD77F8 /* CounterTests */,
 				12653F0B29AD075200CD77F8 /* PrimeModal */,
 				12653F1929AD075200CD77F8 /* PrimeModalTests */,
 				12653F2D29AD079A00CD77F8 /* FavoritePrimes */,
 				12653F3B29AD079A00CD77F8 /* FavoritePrimesTests */,
-				12653F4F29AD07E800CD77F8 /* ComposableArchitecture */,
-				12653F5D29AD07E900CD77F8 /* ComposableArchitectureTests */,
-				124013ED2A0BE172006CD60C /* ComposableArchitectureTestSupport */,
 				124014062A0C1C87006CD60C /* PrimeAlert */,
+				12B8358F2A28B30400BC195E /* Shared */,
 				12653EB429AD03A900CD77F8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -501,6 +514,8 @@
 				12653EEA29AD072600CD77F8 /* Counter.docc */,
 				12653F6F29AD21F200CD77F8 /* Counter.swift */,
 				122964F429AFBB47009D90A7 /* WolframAlpha.swift */,
+				12B835B02A2C86FD00BC195E /* CounterView_iOS.swift */,
+				12B835B22A2C878D00BC195E /* CounterView_macOS.swift */,
 			);
 			path = Counter;
 			sourceTree = "<group>";
@@ -539,6 +554,7 @@
 				12653F2E29AD079A00CD77F8 /* FavoritePrimes.h */,
 				12653F2F29AD079A00CD77F8 /* FavoritePrimes.docc */,
 				12653F6D29AD208B00CD77F8 /* FavoritePrimes.swift */,
+				12B835B42A2CDEBF00BC195E /* FileClient.swift */,
 			);
 			path = FavoritePrimes;
 			sourceTree = "<group>";
@@ -568,6 +584,16 @@
 				12653F5E29AD07E900CD77F8 /* ComposableArchitectureTests.swift */,
 			);
 			path = ComposableArchitectureTests;
+			sourceTree = "<group>";
+		};
+		12B8358F2A28B30400BC195E /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				12B835912A28B53700BC195E /* Base.xcconfig */,
+				12B835902A28B53700BC195E /* Framework.xcconfig */,
+				12B835922A28B53700BC195E /* Test.xcconfig */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -992,6 +1018,9 @@
 			files = (
 				12653EBE29AD03AD00CD77F8 /* Preview Assets.xcassets in Resources */,
 				12653EBB29AD03AD00CD77F8 /* Assets.xcassets in Resources */,
+				12B835932A28B54300BC195E /* Base.xcconfig in Resources */,
+				12B835942A28B54500BC195E /* Framework.xcconfig in Resources */,
+				12B835952A28B54800BC195E /* Test.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1117,6 +1146,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				122964F529AFBB47009D90A7 /* WolframAlpha.swift in Sources */,
+				12B835B32A2C878D00BC195E /* CounterView_macOS.swift in Sources */,
+				12B835B12A2C86FD00BC195E /* CounterView_iOS.swift in Sources */,
 				12653F7029AD21F200CD77F8 /* Counter.swift in Sources */,
 				12653EEB29AD072600CD77F8 /* Counter.docc in Sources */,
 			);
@@ -1153,6 +1184,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				12653F3029AD079A00CD77F8 /* FavoritePrimes.docc in Sources */,
+				12B835B52A2CDEBF00BC195E /* FileClient.swift in Sources */,
 				12653F6E29AD208B00CD77F8 /* FavoritePrimes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1381,6 +1413,7 @@
 		};
 		1240140A2A0C1C87006CD60C /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835902A28B53700BC195E /* Framework.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -1414,6 +1447,7 @@
 		};
 		1240140B2A0C1C87006CD60C /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835902A28B53700BC195E /* Framework.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -1696,6 +1730,7 @@
 		};
 		12653EFF29AD072600CD77F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835902A28B53700BC195E /* Framework.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1726,6 +1761,7 @@
 		};
 		12653F0029AD072600CD77F8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835902A28B53700BC195E /* Framework.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1756,6 +1792,7 @@
 		};
 		12653F0329AD072600CD77F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835922A28B53700BC195E /* Test.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -1774,6 +1811,7 @@
 		};
 		12653F0429AD072600CD77F8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835922A28B53700BC195E /* Test.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -1792,6 +1830,7 @@
 		};
 		12653F2229AD075300CD77F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835902A28B53700BC195E /* Framework.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1822,6 +1861,7 @@
 		};
 		12653F2329AD075300CD77F8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835902A28B53700BC195E /* Framework.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1852,6 +1892,7 @@
 		};
 		12653F2529AD075300CD77F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835922A28B53700BC195E /* Test.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -1869,6 +1910,7 @@
 		};
 		12653F2629AD075300CD77F8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835922A28B53700BC195E /* Test.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -1886,6 +1928,7 @@
 		};
 		12653F4429AD079B00CD77F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835902A28B53700BC195E /* Framework.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1916,6 +1959,7 @@
 		};
 		12653F4529AD079B00CD77F8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835902A28B53700BC195E /* Framework.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1946,6 +1990,7 @@
 		};
 		12653F4729AD079B00CD77F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835922A28B53700BC195E /* Test.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -1963,6 +2008,7 @@
 		};
 		12653F4829AD079B00CD77F8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835922A28B53700BC195E /* Test.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -1980,6 +2026,7 @@
 		};
 		12653F6629AD07E900CD77F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835902A28B53700BC195E /* Framework.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2010,6 +2057,7 @@
 		};
 		12653F6729AD07E900CD77F8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835902A28B53700BC195E /* Framework.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2040,6 +2088,7 @@
 		};
 		12653F6929AD07E900CD77F8 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835922A28B53700BC195E /* Test.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -2057,6 +2106,7 @@
 		};
 		12653F6A29AD07E900CD77F8 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 12B835922A28B53700BC195E /* Test.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;

@@ -13,7 +13,7 @@ class CounterTests: XCTestCase {
             reducer: counterViewReducer,
             environment: { _ in .sync { 17 }},
             steps:
-                // мы ожидаем что count увеличится при incrTapped и уменьшится при decrTapped
+                // we expect count to increase on incrTapped and decrease on decrTapped
             Step(.send, .counter(.incrTapped)) { $0.count = 3 },
             Step(.send, .counter(.incrTapped)) { $0.count = 4 },
             Step(.send, .counter(.decrTapped)) { $0.count = 3 }
@@ -82,7 +82,6 @@ class CounterTests: XCTestCase {
     
     func testSnapshots() {
         let store = Store(initialValue: CounterFeatureState(), reducer: counterViewReducer, environment: { _ in .sync { 17 } })
-        //    let viewStore = store.view
         let counterViewStore = store
             .scope(
                 value: CounterView.State.init,

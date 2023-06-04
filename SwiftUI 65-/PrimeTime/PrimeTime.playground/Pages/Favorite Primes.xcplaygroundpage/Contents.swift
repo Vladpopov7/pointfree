@@ -9,7 +9,7 @@ var environment: FavoritePrimesEnvironment = (
 )
 environment.fileClient.load = { _ in
     Effect.sync { try!
-        JSONEncoder().encode(Array(1...100))
+        JSONEncoder().encode(Array(1...10))
     }
 }
 
@@ -29,16 +29,3 @@ PlaygroundPage.current.liveView = UIHostingController(
     // fix, to display UIHostingController
     .navigationViewStyle(StackNavigationViewStyle())
 )
-
-//func compute(_ x: Int) -> Int {
-//    let computation =  x * x + 1
-//    // print это side effect, side effects сложно тестировать:
-//    print("Computed \(computation)")
-//    return computation
-//}
-//
-//// вот как можно избавиться от side effect, так же и для reducer'ов будем возвращать не Void а Effect
-//func computeAndPrint(_ x: Int) -> (Int, [String]) {
-//    let computation = x * x + 1
-//    return (computation, ["Computed \(computation)"])
-//}

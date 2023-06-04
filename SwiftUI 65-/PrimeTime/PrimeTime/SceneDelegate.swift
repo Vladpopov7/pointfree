@@ -4,38 +4,35 @@ import SwiftUI
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-  var window: UIWindow?
-
-  func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-    if let windowScene = scene as? UIWindowScene {
-      let window = UIWindow(windowScene: windowScene)
-      window.rootViewController = UIHostingController(
-        rootView: ContentView(
-          store: Store(
-            // если добавить большое значение count, то offline расчет будет медленным и главная очередь будет загружена
-//            initialValue: AppState(count: 40_000),
-            initialValue: AppState(),
-            // добавили функционал отслеживания activityFeed, вместо того чтобы просто передать appReducer, и так же logging. Но так как при дальнейшем добавлении других функций цепочка может стать слишком длинной, поэтому используаем функции with и compose из их библиотеки и в дальнейшем просто сможем добавлять функции как параметры в compose функцию по порядку (aspect oriented programming)
-//            reducer: logging(activityFeed(appReducer))
-            reducer: with(
-              appReducer,
-              compose(
-                logging,
-                activityFeed
-              )
-            ),
-            environment: AppEnvironment(
-                fileClient: .live,
-                nthPrime: Counter.nthPrime,
-                offlineNthPrime: Counter.offlineNthPrime
-//                counter: .live,
-//                favoritePrimes: .live
+    var window: UIWindow?
+    
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        if let windowScene = scene as? UIWindowScene {
+            let window = UIWindow(windowScene: windowScene)
+            window.rootViewController = UIHostingController(
+                rootView: ContentView(
+                    store: Store(
+                        // if you add a large count value, then offline calculation will be slow and the main queue will be loaded
+                        //            initialValue: AppState(count: 40_000),
+                        initialValue: AppState(),
+                        // we've added activityFeed tracking functionality instead of just passing in an appReducer, and also logging. We use the with and compose functions from the library and in the future we can simply add functions as parameters to the compose function in order (aspect oriented programming)
+                        reducer: with(
+                            appReducer,
+                            compose(
+                                logging,
+                                activityFeed
+                            )
+                        ),
+                        environment: AppEnvironment(
+                            fileClient: .live,
+                            nthPrime: Counter.nthPrime,
+                            offlineNthPrime: Counter.offlineNthPrime
+                        )
+                    )
+                )
             )
-          )
-        )
-      )
-      self.window = window
-      window.makeKeyAndVisible()
+            self.window = window
+            window.makeKeyAndVisible()
+        }
     }
-  }
 }

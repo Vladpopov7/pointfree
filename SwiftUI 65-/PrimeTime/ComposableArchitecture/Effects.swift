@@ -1,30 +1,47 @@
-//extension Effect where A == (Data?, URLResponse?, Error?) {
-//    public func decode<M: Decodable>(as type: M.Type) -> Effect<M?> {
-//        return self.map { data, _, _ in
-//            data
-//                .flatMap { try? JSONDecoder () .decode (M.self, from: $0) }
-//        }
-//    }
-//}
-//
-//extension Effect {
-//    // вызвать асинхронно на queue
-//    public func receive(on queue: DispatchQueue) -> Effect {
-//        return Effect { callback in
-//            self.run { a in
-//                queue.async {
-//                    callback(a)
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//public func dataTask(with url: URL) -> Effect<(Data?, URLResponse?, Error?)> {
-//    return Effect { callback in
-//        URLSession.shared.dataTask(with: url) { data, response, error in
-//            callback( (data, response, error))
-//        }
-//        .resume()
-//    }
-//}
+import Combine
+
+// it's called Effect because it handles side effects
+public struct Effect<Output>: Publisher {
+    public typealias Failure = Never
+
+    let publisher: AnyPublisher<Output, Failure>
+    
+    public func receive<S>(
+        subscriber: S
+    ) where S: Subscriber, Never == S.Failure, Output == S.Input {
+        self.publisher.receive(subscriber: subscriber)
+    }
+}
+
+extension Effect {
+    public static func fireAndForget(work: @escaping () -> Void) -> Effect {
+        return Deferred { () -> Empty<Output, Never> in
+            work()
+            return Empty(completeImmediately: true)
+        }.eraseToEffect()
+    }
+    
+    public static func sync(work: @escaping () -> Output) -> Effect {
+        // we don't want this to be eager effect, that's why we use Deferred
+        return Deferred {
+            Just(work())
+        }.eraseToEffect()
+    }
+}
+
+extension Publisher where Failure == Never {
+    public func eraseToEffect() -> Effect<Output> {
+        return Effect(publisher: self.eraseToAnyPublisher())
+    }
+}
+
+extension Publisher where Output == Never, Failure == Never {
+    public func fireAndForget<A>() -> Effect<A> {
+        return self.map(absurd).eraseToEffect()
+    }
+}
+
+func absurd<A>(_ never: Never) -> A {
+    // never has no cases, but since the compiler has gotten smarter, we can even not switch on an empty enum
+//    switch never {}
+}

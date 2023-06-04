@@ -33,16 +33,14 @@ public struct IsPrimeModalView: View {
     @ObservedObject var viewStore: ViewStore<State, PrimeModalAction>
     
     public init(store: Store<PrimeModalState, PrimeModalAction>) {
-        print("IsPrimeModalView.init")
         self.store = store
-        // IsPrimeModalView will be recomputed only when its local state changes, because viewStore will remove dupolicates (and other screens have the same behaviour)
+        // IsPrimeModalView will be recomputed only when its local state changes, because viewStore will remove duplicates (and other screens have the same behavior)
         self.viewStore = self.store
             .scope(value: State.init(primeModalState:), action: { $0 })
             .view
     }
     
     public var body: some View {
-        print("IsPrimeModalView.body")
         return VStack {
             if isPrime(self.viewStore.value.count) {
                 Text("\(self.viewStore.value.count) is prime 🎉")

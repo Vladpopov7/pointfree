@@ -2,66 +2,17 @@ import CasePaths
 import Combine
 import SwiftUI
 
-// wrapper для run функции, This signature is what allows us to hand over control to the function we are invoking so that they can give us values back when they are ready, rather than demanding a value immediately.
-struct Parallel<A> {
-    let run: (@escaping (A) -> Void) -> Void
-}
-
-// называется Effect, потому что помогает избежать side effects (описание смотреть в PrimeTime.playground в этом проекте)
-// не все эффекты производят Action, поэтому Action опционален
-//public typealias Effect<Action> = () -> Action?
-// использумя замыкание, effect будет решать когда он готов вернуть Action
-//public typealias Effect<Action> = (@escaping (Action) -> Void) -> Void
-//public struct Effect<A> {
-//    public let run: (@escaping (A) -> Void) -> Void
-//    public init(run: @escaping (@escaping (A) -> Void) -> Void) {
-//        self.run = run
-//    }
-//
-//    public func map<B> (_ f: @escaping (A) -> B) -> Effect<B> {
-//        return Effect<B> { callback in self.run { a in callback(f(a)) } }
-//    }
+// wrapper for the "run" function, This signature is what allows us to hand over control to the function we are invoking so that they can give us values back when they are ready, rather than demanding a value immediately.
+//struct Parallel<A> {
+//    let run: (@escaping (A) -> Void) -> Void
 //}
 
-public struct Effect<Output>: Publisher {
-    public typealias Failure = Never
 
-    let publisher: AnyPublisher<Output, Failure>
-    
-    public func receive<S>(
-        subscriber: S
-    ) where S: Subscriber, Never == S.Failure, Output == S.Input {
-        self.publisher.receive(subscriber: subscriber)
-    }
-}
-
-extension Effect {
-    public static func fireAndForget(work: @escaping () -> Void) -> Effect {
-        return Deferred { () -> Empty<Output, Never> in
-            work()
-            return Empty(completeImmediately: true)
-        }.eraseToEffect()
-    }
-    
-    public static func sync(work: @escaping () -> Output) -> Effect {
-        // we don't want this to be eager effect, that's why we use Deferred
-        return Deferred {
-            Just(work())
-        }.eraseToEffect()
-    }
-}
-
-extension Publisher where Failure == Never {
-    public func eraseToEffect() -> Effect<Output> {
-        return Effect(publisher: self.eraseToAnyPublisher())
-    }
-}
-
-// нужно чтобы возвращал массив эффектов, чтобы можно было использовать функцию combine
+// reducers take a current piece of state and combines it with an action in order to get the new updated state.
+// we need to return an array of effects so that we can use the "combine" function
 public typealias Reducer<Value, Action, Environment> = (inout Value, Action, Environment) -> [Effect<Action>]
-// it's also a valid way of defining Reducer:
-//public typealias Reducer<Value, Action, Environment> = (inout Value, Action) -> (Environment) -> [Effect<Action>]
 
+// combine reducers into one Reducer
 public func combine<Value, Action, Environment>(
     _ reducers: Reducer<Value, Action, Environment>...
 ) -> Reducer<Value, Action, Environment> {
@@ -69,24 +20,10 @@ public func combine<Value, Action, Environment>(
         // call each reducer with a value and action
         let effects = reducers.flatMap { $0(&value, action, environment) }
         return effects
-//        return { () -> Action? in
-//            var finalAction: Action?
-//            for effect in effects {
-//                let action = effect()
-//                if let action = action {
-//                    finalAction = action
-//                }
-//            }
-//            return finalAction
-//        }
     }
 }
 
-//struct CasePath<Root, Value> {
-//    let extract: (Root) -> Value?
-//    let embed: (Value) -> Root
-//}
-
+// "pullback" transforms a reducer on local state into one on global state
 public func pullback<LocalValue, GlobalValue, LocalAction, GlobalAction, LocalEnvironment, GlobalEnvironment>(
     _ reducer: @escaping Reducer<LocalValue, LocalAction, LocalEnvironment>,
     value: WritableKeyPath<GlobalValue, LocalValue>,
@@ -104,12 +41,13 @@ public func pullback<LocalValue, GlobalValue, LocalAction, GlobalAction, LocalEn
     }
 }
 
+// logging without any side effects
 public func logging<Value, Action, Environment>(
     _ reducer: @escaping Reducer<Value, Action, Environment>
 ) -> Reducer<Value, Action, Environment> {
     return { value, action, environment in
         let effects = reducer(&value, action, environment)
-        // inout параметр не может быть captured escaping замыканием, для этого создаем newValue
+        // inout parameter cannot be captured by an escaping closure, that's why we create a "newValue"
         let newValue = value
         // ignore the callcback
         return [.fireAndForget {
@@ -121,6 +59,9 @@ public func logging<Value, Action, Environment>(
     }
 }
 
+// ObservableObject - This protocol utilizes an objectWillChange property of ObservableObjectPublisher, which is pinged before (not after) any mutations are made to your model
+// let objectDidChange = ObservableObjectPublisher()
+// This boilerplate is also not necessary, as the ObservableObject protocol will synthesize a default publisher for you automatically.
 public final class ViewStore<Value, Action>: ObservableObject {
     @Published public fileprivate(set) var value: Value
     fileprivate var cancellable: Cancellable?
@@ -133,10 +74,6 @@ public final class ViewStore<Value, Action>: ObservableObject {
         self.value = value
         self.send = send
     }
-    
-//    public func send(_ action: Action) {
-//
-//    }
 }
 
 extension Store where Value: Equatable {
@@ -159,8 +96,6 @@ extension Store {
             .removeDuplicates(by: predicate)
             .sink(receiveValue: { [weak viewStore] value in
                 viewStore?.value = value
-                // literally referencing self inside of this sink closure
-//                self
             })
         
         return viewStore
@@ -171,7 +106,6 @@ extension Store {
 public final class Store<Value, Action> /*: ObservableObject*/ {
     private let reducer: Reducer<Value, Action, Any>
     private let environment: Any
-    // private(set) чтобы нельзя было менять это значение кроме как через метод  send(_ action: Action)
     @Published private var value: Value
     private var viewCancellable: Cancellable?
     private var effectCancellables: [UUID: AnyCancellable] = [:]
@@ -197,7 +131,6 @@ public final class Store<Value, Action> /*: ObservableObject*/ {
             let effectCancellable = effect.sink(
                 receiveCompletion: { [weak self] _ in
                     didComplete = true
-                    // мы можем попасть сюда до того как effectCancellable присвоется возврат sink похоже, поэтому нельзя использовать force unwrap
                     self?.effectCancellables[uuid] = nil
                 },
                 receiveValue: { [weak self] in self?.send($0) }
@@ -222,10 +155,9 @@ public final class Store<Value, Action> /*: ObservableObject*/ {
             },
             environment: self.environment
         )
-        // обновляем данные в localStore, когда делаем send в globalStore
+        // update data in localStorage when we send to global Store
         localStore.viewCancellable = self.$value
             .map(toLocalValue)
-//            .removeDuplicates()
             .sink { [weak localStore] newValue in
                 localStore?.value = newValue
             }

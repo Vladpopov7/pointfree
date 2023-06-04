@@ -5,9 +5,9 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        // мы в UI тесте задаем 1 для этого ключа, и попадаем в этот if при UI тестах
+        // in UI test we set 1 for this key, and hit this "if" in UI tests
         if ProcessInfo.processInfo.environment["UI_TESTS"] == "1" {
-            // чтобы ускорить UI тесты
+            // to speed up UI tests
             UIView.setAnimationsEnabled(false)
 //            Counter.Current.nthPrime = { _ in .sync { 3 } }
         }

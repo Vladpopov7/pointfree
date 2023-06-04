@@ -21,9 +21,7 @@ struct WolframAlphaResult: Decodable {
     }
 }
 
-// сделали возврат Effect вместо параметра callback, и внутрь Effect передаем callback
 public func nthPrime(_ n: Int) -> Effect<Int?> {
-//, callback: @escaping (Int?) -> Void) -> Void {
     return wolframAlpha(query: "prime \(n)").map { result in
         result
             .flatMap {
@@ -65,9 +63,7 @@ func isPrime(_ p: Int) -> Bool {
 
 import ComposableArchitecture
 
-// сделали возврат Effect вместо параметра callback, и внутрь Effect передаем callback
 func wolframAlpha(query: String) -> Effect<WolframAlphaResult?> {
-    //, callback: @escaping (WolframAlphaResult?) -> Void) -> Void {
     var components = URLComponents(string: "https://api.wolframalpha.com/v2/query")!
     components.queryItems = [
         URLQueryItem(name: "input", value: query),
@@ -82,15 +78,4 @@ func wolframAlpha(query: String) -> Effect<WolframAlphaResult?> {
       .decode(type: WolframAlphaResult?.self, decoder: JSONDecoder())
       .replaceError(with: nil)
       .eraseToEffect()
-    
-//    return dataTask(with: components.url(relativeTo: nil)!)
-//        .decode (as: WolframAlphaResult.self)
 }
-
-//return [Effect { callback in
-//    nthPrime(count) { prime in
-//        DispatchQueue.main.async {
-//            callback(.nthPrimeResponse(prime))
-//        }
-//    }
-//}]

@@ -3,24 +3,18 @@ import ComposableArchitecture
 import PlaygroundSupport
 import SwiftUI
 
-var environment = CounterEnvironment.mock
-environment.nthPrime = { _ in
-        .sync { 7236893748932 }
-}
-
-// мы можем использовать отдельные экраны, как-будто у нас нет общего состояния, т.е. можно начать мигрировать с UIKit на SwiftUI с мелких экранов\
-// разбор экрана которые имеет modal экран и может управлять состоянием показа этого экрана (primeModal(PrimeModalAction) в CounterViewAction)
-PlaygroundPage.current.liveView = UIHostingController(
-  rootView: CounterView(
-    store: Store<CounterViewState, CounterViewAction>(
-      initialValue: CounterViewState(
-        alertNthPrime: nil,
-        count: 0,
-        favoritePrimes: [],
-        isNthPrimeButtonDisabled: false
-      ),
-      reducer:  logging(counterViewReducer),
-      environment: environment
+// we can use separate screens as if we don't have a shared(common) state for the whole app, i.e. you can start migrating from UIKit to SwiftUI from small screens
+PlaygroundPage.current.setLiveView(
+    CounterView(
+        store: Store(
+            initialValue: CounterFeatureState(
+                alertNthPrime: nil,
+                count: 0,
+                favoritePrimes: [],
+                isNthPrimeRequestInFlight: false
+            ),
+            reducer: logging(counterViewReducer),
+            environment: Counter.nthPrime
+        )
     )
-  )
 )
