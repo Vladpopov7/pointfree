@@ -86,10 +86,16 @@ extension Reducer {
 // ObservableObject - This protocol utilizes an objectWillChange property of ObservableObjectPublisher, which is pinged before (not after) any mutations are made to your model
 // let objectDidChange = ObservableObjectPublisher()
 // This boilerplate is also not necessary, as the ObservableObject protocol will synthesize a default publisher for you automatically.
+// "Dynamic member lookup" allows you to enhance a type with the ability to accept dot-syntax calls for properties that don’t live directly on the type.
+@dynamicMemberLookup
 public final class ViewStore<Value, Action>: ObservableObject {
     @Published public fileprivate(set) var value: Value
     fileprivate var cancellable: Cancellable?
     public let send: (Action) -> Void
+    
+    public subscript<LocalValue>(dynamicMember keyPath: KeyPath<Value, LocalValue>) -> LocalValue {
+        self.value[keyPath: keyPath]
+    }
     
     public init(
         initialValue value: Value,
@@ -97,6 +103,26 @@ public final class ViewStore<Value, Action>: ObservableObject {
     ) {
         self.value = value
         self.send = send
+    }
+    
+    public func binding<LocalValue>(
+        get: @escaping (Value) -> LocalValue,
+        send toAction: @escaping (LocalValue) -> Action
+    ) -> Binding<LocalValue> {
+        Binding(
+            get: { get(self.value) },
+            set: { self.send(toAction($0)) }
+        )
+    }
+    
+    public func binding<LocalValue>(
+        get: @escaping (Value) -> LocalValue,
+        send action: Action
+    ) -> Binding<LocalValue> {
+        Binding(
+            get: { get(self.value) },
+            set: { _ in self.send(action) }
+        )
     }
 }
 

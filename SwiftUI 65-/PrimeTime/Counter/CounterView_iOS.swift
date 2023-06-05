@@ -45,24 +45,27 @@ public struct CounterView: View {
         return VStack {
             HStack {
                 Button("-") { self.viewStore.send(.decrTapped) }
-                    .disabled(self.viewStore.value.isDecrementButtonDisabled)
-                Text("\(self.viewStore.value.count)")
+                // we can use "self.viewStore." instead of "self.viewStore.value." with help of "Dynamic member lookup".
+                    .disabled(self.viewStore.isDecrementButtonDisabled)
+                Text("\(self.viewStore.count)")
                 Button("+") { self.viewStore.send(.incrTapped) }
-                    .disabled(self.viewStore.value.isIncrementButtonDisabled)
+                    .disabled(self.viewStore.isIncrementButtonDisabled)
             }
             Button("Is this prime?") { self.viewStore.send(.isPrimeButtonTapped) }
-            Button(self.viewStore.value.nthPrimeButtonTitle) {
+            Button(self.viewStore.nthPrimeButtonTitle) {
                 self.viewStore.send(.nthPrimeButtonTapped)
             }
-                .disabled(self.viewStore.value.isNthPrimeButtonDisabled)
+                .disabled(self.viewStore.isNthPrimeButtonDisabled)
         }
         .font(.title)
         .navigationBarTitle("Counter demo")
-        // since we don't store "isPresented" in @State anymore, so we use .constant
+        // since we don't store "isPresented" in @State anymore, so we use binding method from ViewStore
 //        .sheet(isPresented: self.$isPrimeModalShown) {
         .sheet(
-            isPresented: .constant(self.viewStore.value.isPrimeModalShown),
-            onDismiss: { self.viewStore.send(.primeModalDismissed) }
+            isPresented: self.viewStore.binding(
+                get: \.isPrimeModalShown,
+                send: .primeModalDismissed
+            )
         ) {
             IsPrimeModalView(
                 store: self.store
@@ -74,16 +77,13 @@ public struct CounterView: View {
         }
         // will be shown when alertNthPrime is not nil
         .alert(
-            // since we store alertNthPrime in store as a simple property, and we need to pass Binding, we need to create Binding ourselves here
-//            item: Binding(get: { self.viewStore.value.alertNthPrime }, set: { _ in })
-            // but it's even easier to create a Binding (which doesn't have a setter) like so:
-            item: .constant(self.viewStore.value.alertNthPrime)
+            item: self.viewStore.binding(
+                get: \.alertNthPrime,
+                send: .alertDismissButtonTapped
+            )
         ) { alert in
             Alert(
-                title: Text(alert.title),
-                dismissButton: Alert.Button.default(Text("Ok")) {
-                    self.viewStore.send(.alertDismissButtonTapped)
-                }
+                title: Text(alert.title)
             )
         }
         // to make tap gesture working in the white areay

@@ -31,7 +31,6 @@ public struct CounterView: View {
     @ObservedObject var viewStore: ViewStore<State, Action>
     
     public init(store: Store<CounterFeatureState, CounterFeatureAction>) {
-        print("CounterView.init")
         self.store = store
         self.viewStore = self.store
             .scope(
@@ -42,27 +41,26 @@ public struct CounterView: View {
     }
     
     public var body: some View {
-        print("CounterView.body")
         return VStack {
             HStack {
                 Button("-") { self.viewStore.send(.decrTapped) }
-                    .disabled(self.viewStore.value.isDecrementButtonDisabled)
-                Text("\(self.viewStore.value.count)")
+                    .disabled(self.viewStore.isDecrementButtonDisabled)
+                Text("\(self.viewStore.count)")
                 Button("+") { self.viewStore.send(.incrTapped) }
-                    .disabled(self.viewStore.value.isIncrementButtonDisabled)
+                    .disabled(self.viewStore.isIncrementButtonDisabled)
             }
             Button("Is this prime?") { self.viewStore.send(.isPrimeButtonTapped) }
-            Button(self.viewStore.value.nthPrimeButtonTitle) {
+            Button(self.viewStore.nthPrimeButtonTitle) {
                 self.viewStore.send(.nthPrimeButtonTapped)
             }
-                .disabled(self.viewStore.value.isNthPrimeButtonDisabled)
+                .disabled(self.viewStore.isNthPrimeButtonDisabled)
         }
-        // since we don't store "isPresented" in @State anymore, so we use .constant
+        // since we don't store "isPresented" in @State anymore, so we use binding method from ViewStore
 //        .sheet(isPresented: self.$isPrimeModalShown) {
         .sheet(
-            isPresented: Binding(
-                get: { self.viewStore.value.isPrimePopoverShown },
-                set: { _ in self.viewStore.send(.primePopoverDismissed) }
+            isPresented: self.viewStore.binding(
+                get: \.isPrimePopoverShown,
+                send: .primePopoverDismissed
             )
         ) {
             IsPrimeModalView(
@@ -74,7 +72,7 @@ public struct CounterView: View {
             )
         }
         .alert(
-            item: .constant(self.viewStore.value.alertNthPrime)
+            item: .constant(self.viewStore.alertNthPrime)
         ) { alert in
             Alert(
                 title: Text(alert.title),

@@ -5,7 +5,7 @@ final class FavoritePrimesTests: XCTestCase {
     func testDeleteFavoritePrimes() {
         let environment = FavoritePrimesEnvironment(fileClient: .mock, nthPrime: { _ in .sync { 17 } })
         var state = FavoritePrimesState(alertNthPrime: nil, favoritePrimes: [2, 3, 5, 7])
-        let effects = favoritePrimesReducer(state: &state, action: .deleteFavoritePrimes([2]), environment: environment)
+        let effects = favoritePrimesReducer(&state, .deleteFavoritePrimes([2]), environment)
         
         XCTAssertNil(state.alertNthPrime)
         XCTAssertEqual(state.favoritePrimes, [2, 3, 7])
@@ -23,7 +23,7 @@ final class FavoritePrimesTests: XCTestCase {
         
         let environment = FavoritePrimesEnvironment(fileClient: fileClient, nthPrime: { _ in .sync { 17 } })
         var state = FavoritePrimesState(alertNthPrime: nil, favoritePrimes: [2, 3, 5, 7])
-        let effects = favoritePrimesReducer(state: &state, action: .saveButtonTapped, environment: environment)
+        let effects = favoritePrimesReducer(&state, .saveButtonTapped, environment)
         
         XCTAssertNil(state.alertNthPrime)
         XCTAssertEqual(state.favoritePrimes, [2, 3, 5, 7])
@@ -40,7 +40,7 @@ final class FavoritePrimesTests: XCTestCase {
         
         let environment = FavoritePrimesEnvironment(fileClient: fileClient, nthPrime: { _ in .sync { 17 } })
         var state = FavoritePrimesState(alertNthPrime: nil, favoritePrimes: [2, 3, 5, 7])
-        var effects = favoritePrimesReducer(state: &state, action: .loadButtonTapped, environment: environment)
+        var effects = favoritePrimesReducer(&state, .loadButtonTapped, environment)
         
         XCTAssertNil(state.alertNthPrime)
         XCTAssertEqual(state.favoritePrimes, [2, 3, 5, 7])
@@ -58,7 +58,7 @@ final class FavoritePrimesTests: XCTestCase {
             })
         self.wait(for: [receivedCompletion], timeout: 0)
         
-        effects = favoritePrimesReducer(state: &state, action: nextAction, environment: environment)
+        effects = favoritePrimesReducer(&state, nextAction, environment)
         
         XCTAssertNil(state.alertNthPrime)
         XCTAssertEqual(state.favoritePrimes, [2, 31])

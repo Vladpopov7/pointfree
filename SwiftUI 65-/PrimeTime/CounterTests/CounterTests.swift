@@ -10,7 +10,7 @@ class CounterTests: XCTestCase {
     func testIncrDecrButtonTapped() {
         assert(
             initialValue: CounterFeatureState(count: 2),
-            reducer: counterViewReducer,
+            reducer: counterFeatureReducer,
             environment: { _ in .sync { 17 }},
             steps:
                 // we expect count to increase on incrTapped and decrease on decrTapped
@@ -27,7 +27,7 @@ class CounterTests: XCTestCase {
                 count: 7,
                 isNthPrimeRequestInFlight: false
             ),
-            reducer: counterViewReducer,
+            reducer: counterFeatureReducer,
             environment: { _ in .sync { 17 } },
             steps:
                 Step(.send, .counter(.requestNthPrime)) {
@@ -50,7 +50,7 @@ class CounterTests: XCTestCase {
                 count: 7,
                 isNthPrimeRequestInFlight: false
             ),
-            reducer: counterViewReducer,
+            reducer: counterFeatureReducer,
             environment: { _ in .sync { nil } },
             steps:
                 Step(.send, .counter(.requestNthPrime)) {
@@ -68,7 +68,7 @@ class CounterTests: XCTestCase {
                 count: 2,
                 favoritePrimes: [3, 5]
             ),
-            reducer: counterViewReducer,
+            reducer: counterFeatureReducer,
             environment: { _ in .sync { 17 } },
             steps:
                 Step(.send, .primeModal(.saveFavoritePrimeTapped)) {
@@ -81,7 +81,7 @@ class CounterTests: XCTestCase {
     }
     
     func testSnapshots() {
-        let store = Store(initialValue: CounterFeatureState(), reducer: counterViewReducer, environment: { _ in .sync { 17 } })
+        let store = Store(initialValue: CounterFeatureState(), reducer: counterFeatureReducer, environment: { _ in .sync { 17 } })
         let counterViewStore = store
             .scope(
                 value: CounterView.State.init,

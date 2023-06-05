@@ -4,6 +4,5 @@
         <page name='Counter'/>
         <page name='Favorite Primes'/>
         <page name='Prime Modal'/>
-        <page name='Untitled Page'/>
     </pages>
 </playground>

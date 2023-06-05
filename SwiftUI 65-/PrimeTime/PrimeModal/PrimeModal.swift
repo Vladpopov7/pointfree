@@ -38,9 +38,9 @@ public struct IsPrimeModalView: View {
     
     public var body: some View {
         return VStack {
-            if isPrime(self.viewStore.value.count) {
-                Text("\(self.viewStore.value.count) is prime 🎉")
-                if self.viewStore.value.isFavorite {
+            if isPrime(self.viewStore.count) {
+                Text("\(self.viewStore.count) is prime 🎉")
+                if self.viewStore.isFavorite {
                     Button("Remove from favorite primes") {
                         self.viewStore.send(.removeFavoritePrimeTapped)
                     }
@@ -50,7 +50,7 @@ public struct IsPrimeModalView: View {
                     }
                 }
             } else {
-                Text("\(self.viewStore.value.count) is not prime :(")
+                Text("\(self.viewStore.count) is not prime :(")
             }
         }
     }
