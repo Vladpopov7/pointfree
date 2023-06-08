@@ -135,8 +135,6 @@ extension Reducer where Value == AppState, Action == AppAction, Environment == A
     }
 }
 
-let isInExperiment = false // Bool.random()
-
 struct ContentView: View {
     let store: Store<AppState, AppAction>
     
@@ -147,29 +145,27 @@ struct ContentView: View {
     var body: some View {
         return NavigationView {
             List {
-                if !isInExperiment {
-                    NavigationLink(
-                        "Counter demo",
-                        destination: CounterView(
-                            store: self.store
-                                .scope(
-                                    value: { $0.counterView },
-                                    action: { .counterView($0) }
-                                )
-                        )
+                // the same view (CounterView) can be used with different environments
+                NavigationLink(
+                    "Counter demo",
+                    destination: CounterView(
+                        store: self.store
+                            .scope(
+                                value: { $0.counterView },
+                                action: { .counterView($0) }
+                            )
                     )
-                } else {
-                    NavigationLink(
-                        "Offline counter demo",
-                        destination: CounterView(
-                            store: self.store
-                                .scope(
-                                    value: { $0.counterView },
-                                    action: { .offlineCounterView($0) }
-                                )
-                        )
+                )
+                NavigationLink(
+                    "Offline counter demo",
+                    destination: CounterView(
+                        store: self.store
+                            .scope(
+                                value: { $0.counterView },
+                                action: { .offlineCounterView($0) }
+                            )
                     )
-                }
+                )
                 NavigationLink(
                     "Favorite primes",
                     destination: FavoritePrimesView(
